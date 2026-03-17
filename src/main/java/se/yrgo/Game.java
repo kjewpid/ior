@@ -48,7 +48,7 @@ public class Game extends ApplicationAdapter {
 
         shaperenderer.begin(ShapeRenderer.ShapeType.Filled);
         shaperenderer.setColor(1, 1, 0, 1);
-        shaperenderer.circle(910, characterY, 30);
+        shaperenderer.circle(350, characterY, 30);
         shaperenderer.end();
 
 
