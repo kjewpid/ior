@@ -22,12 +22,15 @@ public class Game extends ApplicationAdapter {
     private Texture startImage;
 
     //Karaktär
-    private ShapeRenderer shaperenderer; // Tillfällig karaktär
+    private Texture characterImage;
+    private float startX = -120;
+    private float characterX = 400;
+    private float flySpeed = 600;
 
     @Override
     public void create() {
-        shaperenderer = new ShapeRenderer();
         batch = new SpriteBatch();
+        characterImage = new Texture(Gdx.files.internal("assets/Character.png"));
         startImage = new Texture(Gdx.files.internal("assets/StartImage.png"));
         buttonX = (Gdx.graphics.getWidth() - buttonWidth) / 2;
         buttonY = (Gdx.graphics.getHeight() - buttonHeight) / 2;
@@ -50,33 +53,39 @@ public class Game extends ApplicationAdapter {
             return;
         }
 
-
         float delta = Gdx.graphics.getDeltaTime();
         // Kolla input
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             jump();
         }
 
+        // Karaktär-kod
         float screenHeight = Gdx.graphics.getHeight();
+        if (startX < characterX) {
+            startX += flySpeed * delta;
+            if (startX > characterX) {
+                startX = characterX;
+            }
+        }
+
         if (characterY > screenHeight) {
             characterY = screenHeight;
             velocity = 0;
         }
 
-        if (characterY < 0) { // Hindra karaktär från att falla utanför skärmen
+        if (characterY < 0) {
             characterY = 0;
             if (velocity < 0) {
                 velocity = 0;
             }
         }
 
+        batch.begin();
+        batch.draw(characterImage, startX - 30, characterY - 30, 120, 120);
+        batch.end();
+
         velocity += gravity * delta;
         characterY += velocity * delta;
-
-        shaperenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shaperenderer.setColor(1, 1, 0, 1);
-        shaperenderer.circle(910, characterY, 30);
-        shaperenderer.end();
     }
 
     // NY METOD FÖR HOPP
@@ -86,8 +95,8 @@ public class Game extends ApplicationAdapter {
 
     @Override
     public void dispose() {
-        shaperenderer.dispose();
         batch.dispose();
+        characterImage.dispose();
         startImage.dispose();
     }
 }
