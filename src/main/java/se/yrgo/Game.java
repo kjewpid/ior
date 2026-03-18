@@ -4,19 +4,33 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 public class Game extends ApplicationAdapter {
     private float characterY = 540;
     private float velocity = 600;
     private float gravity = -1500;
+    private boolean gameStarted = false;
+    private SpriteBatch batch;
 
+    //StartImage
+    private float buttonWidth = 400;
+    private float buttonHeight = 200;
+    private float buttonX, buttonY;
+    private Texture startImage;
+
+    //Karaktär
     private ShapeRenderer shaperenderer; // Tillfällig karaktär
 
     @Override
     public void create() {
         shaperenderer = new ShapeRenderer();
-        // För att initiera resurser, t.ex. texturer, bilder, fonts etc
+        batch = new SpriteBatch();
+        startImage = new Texture(Gdx.files.internal("assets/StartImage.png"));
+        buttonX = (Gdx.graphics.getWidth() - buttonWidth) / 2;
+        buttonY = (Gdx.graphics.getHeight() - buttonHeight) / 2;
     }
 
     @Override
@@ -24,6 +38,20 @@ public class Game extends ApplicationAdapter {
         Gdx.gl.glClearColor(0.5f, 0.8f, 1f, 1);  // Tillfälligt för att se bakgrund
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        if (!gameStarted && Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            gameStarted = true;
+            jump();
+        }
+
+        if (!gameStarted) {
+            batch.begin();
+            batch.draw(startImage, buttonX, buttonY, buttonWidth, buttonHeight);
+            batch.end();
+            return;
+        }
+
+
+        float delta = Gdx.graphics.getDeltaTime();
         // Kolla input
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             jump();
@@ -42,7 +70,6 @@ public class Game extends ApplicationAdapter {
             }
         }
 
-        float delta = Gdx.graphics.getDeltaTime();
         velocity += gravity * delta;
         characterY += velocity * delta;
 
@@ -60,6 +87,7 @@ public class Game extends ApplicationAdapter {
     @Override
     public void dispose() {
         shaperenderer.dispose();
-        // För att stänga resurser
+        batch.dispose();
+        startImage.dispose();
     }
 }
