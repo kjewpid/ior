@@ -1,4 +1,4 @@
-package se.yrgo;
+package se.yrgo.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -6,7 +6,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 public class Game extends ApplicationAdapter {
     private float characterY = 540;
@@ -30,8 +29,8 @@ public class Game extends ApplicationAdapter {
     @Override
     public void create() {
         batch = new SpriteBatch();
-        characterImage = new Texture(Gdx.files.internal("assets/Character.png"));
-        startImage = new Texture(Gdx.files.internal("assets/StartImage.png"));
+        characterImage = new Texture(Gdx.files.internal("Character.png"));
+        startImage = new Texture(Gdx.files.internal("StartImage.png"));
         buttonX = (Gdx.graphics.getWidth() - buttonWidth) / 2;
         buttonY = (Gdx.graphics.getHeight() - buttonHeight) / 2;
     }

@@ -1,9 +1,10 @@
-package se.yrgo;
+package se.yrgo.game.lwjgl3;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import se.yrgo.game.Game;
 
-public class DesktopLauncher {
+public class Lwjgl3Launcher {
 
     public static void main(String[] args) {
 
