@@ -3,14 +3,20 @@ package se.yrgo.game;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 
 import java.util.ArrayList;
+
+import com.badlogic.gdx.audio.Sound;
+
 
 public class Game extends ApplicationAdapter {
     private enum GameState {
@@ -27,20 +33,18 @@ public class Game extends ApplicationAdapter {
     private boolean isDying = false;
     private boolean finishedDying = false;
 
-    //StartImage
     private float buttonWidth = 400;
     private float buttonHeight = 200;
     private float buttonX, buttonY;
     private Texture startImage;
 
-    //Karaktär
+    // Karaktär
     private Texture characterImage;
     private float startX = -120;
     private float characterX = 400;
     private float flySpeed = 600;
 
     //Hinder
-
     private float obstacleDistance = 500;
     private float obstacleSpeed = 200;
     private float spawnRate = obstacleDistance / obstacleSpeed;
@@ -48,6 +52,13 @@ public class Game extends ApplicationAdapter {
     private ArrayList<Obstacle> obstacles = new ArrayList<>();
     private float spawnTimer = 0;
     private int totalObstaclesSpawned = 0;
+
+    // Poäng
+    private ScoreManager scoreManager;
+    private BitmapFont font;
+    private GlyphLayout layout;
+    private Sound highscoreSound;
+    private boolean newHighscorePlayed = false;
 
     @Override
     public void create() {
@@ -57,11 +68,20 @@ public class Game extends ApplicationAdapter {
         obstacleImage = new Texture("Obstacle.JPG");
         buttonX = (Gdx.graphics.getWidth() - buttonWidth) / 2;
         buttonY = (Gdx.graphics.getHeight() - buttonHeight) / 2;
+
+        scoreManager = new ScoreManager();
+        font = new BitmapFont();
+        font.setColor(1, 0, 0, 1);
+        font.getData().setScale(3);
+
+        layout = new GlyphLayout();
+
+        highscoreSound = Gdx.audio.newSound(Gdx.files.internal("HighScoreSound.wav"));
     }
 
     @Override
     public void render() {
-        Gdx.gl.glClearColor(0.5f, 0.8f, 1f, 1);  // Tillfälligt för att se bakgrund
+        Gdx.gl.glClearColor(0.5f, 0.8f, 1f, 1); // Tillfälligt för att se bakgrund
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         float delta = Gdx.graphics.getDeltaTime();
         switch (state) {
@@ -92,9 +112,10 @@ public class Game extends ApplicationAdapter {
         characterImage.dispose();
         startImage.dispose();
         obstacleImage.dispose();
+        highscoreSound.dispose();
+
     }
 
-    // NY METOD FÖR HOPP
     private void jump() {
         velocity = 600;
     }
@@ -103,6 +124,8 @@ public class Game extends ApplicationAdapter {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             state = GameState.PLAYING;
             jump();
+            newHighscorePlayed = false;
+            scoreManager.resetScore();
         }
     }
 
@@ -182,21 +205,53 @@ public class Game extends ApplicationAdapter {
         obstacles.removeIf(o -> o.getX() + 100 < 0);
     }
 
+    public void score() {
+        String scoreText = "Score: " + scoreManager.getScore();
+        String highScoreText = "Highscore: " + scoreManager.getHighScore();
+
+        layout.setText(font, scoreText);
+        float x = (Gdx.graphics.getWidth() - layout.width) / 2;
+        float y = Gdx.graphics.getHeight() - 100;
+        font.draw(batch, scoreText, x, y);
+
+        font.draw(batch, highScoreText, 20, Gdx.graphics.getHeight() - 20);
+
+        if (Gdx.input.justTouched()) {
+            scoreManager.incrementPoint();
+        }
+
+        if (scoreManager.getScore() == scoreManager.getHighScore()
+            && scoreManager.getScore() > 0
+            && !newHighscorePlayed) {
+
+            highscoreSound.play(0.7f);
+            newHighscorePlayed = true;
+        }
+        /*
+         * Lägg till denna när vi har skaffat hinder, för att ge poäng för hinder
+         * istället
+         * if (obstacleX < characterX && !obstacleCounted) {
+         * scoreManager.incrementPoint();
+         * obstacleCounted = true;
+         * }
+         */
+    }
+
     private void renderGame() {
         batch.begin();
         batch.draw(characterImage, startX - 30, characterY - 30, 120, 120);
 
-        for (Obstacle o : obstacles) {
+        for (
+            Obstacle o : obstacles) {
             batch.draw(obstacleImage, o.getX(), 0, 100, o.getGapY());
 
             batch.draw(obstacleImage, o.getX(), o.getGapY() + o.getGapHeight(),
                 100, Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()),
                 0, 0, obstacleImage.getWidth(), obstacleImage.getHeight(),
                 false, true);
-
         }
+        score();
         batch.end();
-
     }
 
     private Circle getCharacterArea() {
