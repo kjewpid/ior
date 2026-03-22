@@ -36,11 +36,11 @@ public class Obstacle {
         return gapHeight;
     }
 
-    public boolean passedObstacle() {
+    public boolean hasPassed() {
         return passedObstacle;
     }
 
-    public void setPassedObstacle() {
+    public void setPassed() {
         this.passedObstacle = true;
     }
 }

@@ -190,7 +190,7 @@ public class Game extends ApplicationAdapter {
 
             if (totalObstaclesSpawned % 10 == 0) { // Öka spawnrate och speed
                 obstacleSpeed *= 1.1f;
-                if (obstacleSpeed == 800) { // Max speed
+                if (obstacleSpeed >= 800) { // Max speed
                     obstacleSpeed = 800;
                 }
                 spawnRate = obstacleDistance / obstacleSpeed;
@@ -202,9 +202,9 @@ public class Game extends ApplicationAdapter {
         obstacles.forEach(o -> o.update(delta, obstacleSpeed));
         obstacles.removeIf(o -> o.getX() + 100 < 0);
         obstacles.forEach(o -> {
-            if (o.getX() < characterX && !o.passedObstacle()) {
+            if (o.getX() + 50 < characterX && !o.hasPassed()) { //+50 för att x axel är i mitten av hinder, hinder är 100 brett
                 scoreManager.incrementPoint();
-                o.setPassedObstacle();
+                o.setPassed();
             }
         });
     }
