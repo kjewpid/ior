@@ -7,6 +7,7 @@ public class Obstacle {
     private float gapY;
     private float gapHeight = 300;
     //private Texture texture;
+    private boolean passedObstacle = false;
 
     public Obstacle(float x, float gapY, Texture texture) {
         this.x = x;
@@ -33,6 +34,14 @@ public class Obstacle {
 
     public float getGapHeight() {
         return gapHeight;
+    }
+
+    public boolean passedObstacle() {
+        return passedObstacle;
+    }
+
+    public void setPassedObstacle() {
+        this.passedObstacle = true;
     }
 }
 

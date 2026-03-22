@@ -20,9 +20,7 @@ import com.badlogic.gdx.audio.Sound;
 
 public class Game extends ApplicationAdapter {
     private enum GameState {
-        START,
-        PLAYING,
-        GAME_OVER
+        START, PLAYING, GAME_OVER
     }
 
     private float characterY = 540;
@@ -203,6 +201,12 @@ public class Game extends ApplicationAdapter {
     private void updateObstacles(float delta) {
         obstacles.forEach(o -> o.update(delta, obstacleSpeed));
         obstacles.removeIf(o -> o.getX() + 100 < 0);
+        obstacles.forEach(o -> {
+            if (o.getX() < characterX && !o.passedObstacle()) {
+                scoreManager.incrementPoint();
+                o.setPassedObstacle();
+            }
+        });
     }
 
     public void score() {
@@ -215,40 +219,26 @@ public class Game extends ApplicationAdapter {
         font.draw(batch, scoreText, x, y);
 
         font.draw(batch, highScoreText, 20, Gdx.graphics.getHeight() - 20);
-
+        /* Osäker över denna metod, på fel ställe men ska man få poäng för att ha pressat enter?
         if (Gdx.input.justTouched()) {
             scoreManager.incrementPoint();
-        }
+        } */
 
         if (scoreManager.getScore() == scoreManager.getHighScore()
-            && scoreManager.getScore() > 0
-            && !newHighscorePlayed) {
-
+            && scoreManager.getScore() > 0 && !newHighscorePlayed) {
             highscoreSound.play(0.7f);
             newHighscorePlayed = true;
         }
-        /*
-         * Lägg till denna när vi har skaffat hinder, för att ge poäng för hinder
-         * istället
-         * if (obstacleX < characterX && !obstacleCounted) {
-         * scoreManager.incrementPoint();
-         * obstacleCounted = true;
-         * }
-         */
     }
 
     private void renderGame() {
         batch.begin();
         batch.draw(characterImage, startX - 30, characterY - 30, 120, 120);
 
-        for (
-            Obstacle o : obstacles) {
+        for (Obstacle o : obstacles) {
             batch.draw(obstacleImage, o.getX(), 0, 100, o.getGapY());
 
-            batch.draw(obstacleImage, o.getX(), o.getGapY() + o.getGapHeight(),
-                100, Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()),
-                0, 0, obstacleImage.getWidth(), obstacleImage.getHeight(),
-                false, true);
+            batch.draw(obstacleImage, o.getX(), o.getGapY() + o.getGapHeight(), 100, Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()), 0, 0, obstacleImage.getWidth(), obstacleImage.getHeight(), false, true);
         }
         score();
         batch.end();
@@ -266,8 +256,7 @@ public class Game extends ApplicationAdapter {
 
         for (Obstacle o : obstacles) {
             Rectangle topRectangle = new Rectangle(o.getX(), 0, 100, o.getGapY());
-            Rectangle bottomRectangle = new Rectangle(o.getX(), o.getGapY() + o.getGapHeight(), 100,
-                Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()));
+            Rectangle bottomRectangle = new Rectangle(o.getX(), o.getGapY() + o.getGapHeight(), 100, Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()));
 
             if (Intersector.overlaps(character, topRectangle) || Intersector.overlaps(character, bottomRectangle)) {
                 gameOver();
@@ -297,6 +286,11 @@ public class Game extends ApplicationAdapter {
 
         obstacleSpeed = 200;
         spawnRate = obstacleDistance / obstacleSpeed;
+
+        scoreManager.resetScore();
+
+        isDying = false;
+        finishedDying = false;
 
         state = GameState.PLAYING;
     }
