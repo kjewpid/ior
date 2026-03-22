@@ -6,6 +6,9 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Circle;
+import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Rectangle;
 
 import java.util.ArrayList;
 
@@ -65,7 +68,7 @@ public class Game extends ApplicationAdapter {
         handleInput();
         updateGame(delta);
         renderGame();
-
+        checkCollision();
     }
 
     @Override
@@ -172,5 +175,33 @@ public class Game extends ApplicationAdapter {
         }
         batch.end();
 
+    }
+
+    private Circle getCharacterArea(){
+        float radius = 60;
+        float centerX = startX;
+        float centerY = characterY;
+        return new Circle(centerX, centerY, radius);
+    }
+    private void checkCollision() {
+        Circle character = getCharacterArea();
+
+        for (Obstacle o : obstacles){
+            Rectangle topRectangle = new Rectangle(o.getX(), 0, 100, o.getGapY());
+            Rectangle bottomRectangle = new Rectangle(o.getX(), o.getGapY() + o.getGapHeight(), 100,
+                Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()));
+
+            if (Intersector.overlaps(character, topRectangle) || Intersector.overlaps(character, bottomRectangle)){
+                gameOver();
+            }
+        }
+    }
+
+    private void gameOver(){
+        gameStarted = false;
+        die();
+    }
+    private void die() {
+        velocity = 0;
     }
 }
