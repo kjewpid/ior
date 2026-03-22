@@ -53,25 +53,60 @@ public class Game extends ApplicationAdapter {
         Gdx.gl.glClearColor(0.5f, 0.8f, 1f, 1);  // Tillfälligt för att se bakgrund
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        if (!gameStarted && Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            gameStarted = true;
-            jump();
-        }
-
         if (!gameStarted) {
-            batch.begin();
-            batch.draw(startImage, buttonX, buttonY, buttonWidth, buttonHeight);
-            batch.end();
+            startGame();
+            renderStartButton();
             return;
+            // Generera bakgrund här senare
         }
 
         float delta = Gdx.graphics.getDeltaTime();
-        // Kolla input
+
+        handleInput();
+        updateGame(delta);
+        renderGame();
+
+    }
+
+    @Override
+    public void dispose() {
+        batch.dispose();
+        characterImage.dispose();
+        startImage.dispose();
+        obstacleImage.dispose();
+    }
+
+    // NY METOD FÖR HOPP
+    private void jump() {
+        velocity = 600;
+    }
+
+    private void startGame() {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            gameStarted = true;
+            jump();
+        }
+    }
+
+    private void renderStartButton() {
+        batch.begin();
+        batch.draw(startImage, buttonX, buttonY, buttonWidth, buttonHeight);
+        batch.end();
+    }
+
+    private void handleInput() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             jump();
         }
+    }
 
-        // Karaktär-kod
+    private void updateGame(float delta) {
+        updateCharacter(delta);
+        spawnObstacles(delta);
+        updateObstacles(delta);
+    }
+
+    private void updateCharacter(float delta) {
         float screenHeight = Gdx.graphics.getHeight();
         if (startX < characterX) {
             startX += flySpeed * delta;
@@ -79,6 +114,9 @@ public class Game extends ApplicationAdapter {
                 startX = characterX;
             }
         }
+
+        velocity += gravity * delta;
+        characterY += velocity * delta;
 
         if (characterY > screenHeight) {
             characterY = screenHeight;
@@ -91,14 +129,9 @@ public class Game extends ApplicationAdapter {
                 velocity = 0;
             }
         }
+    }
 
-        batch.begin();
-        batch.draw(characterImage, startX - 30, characterY - 30, 120, 120);
-        batch.end();
-
-        velocity += gravity * delta;
-        characterY += velocity * delta;
-
+    private void spawnObstacles(float delta) {
         spawnTimer += delta;
 
         if (spawnTimer > spawnRate) { // Spawna hinder varje x sekund
@@ -117,8 +150,17 @@ public class Game extends ApplicationAdapter {
                 spawnRate = obstacleDistance / obstacleSpeed;
             }
         }
+    }
 
+    private void updateObstacles(float delta) {
+        obstacles.forEach(o -> o.update(delta, obstacleSpeed));
+        obstacles.removeIf(o -> o.getX() + 100 < 0);
+    }
+
+    private void renderGame() {
         batch.begin();
+        batch.draw(characterImage, startX - 30, characterY - 30, 120, 120);
+
         for (Obstacle o : obstacles) {
             batch.draw(obstacleImage, o.getX(), 0, 100, o.getGapY());
 
@@ -126,25 +168,9 @@ public class Game extends ApplicationAdapter {
                 100, Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()),
                 0, 0, obstacleImage.getWidth(), obstacleImage.getHeight(),
                 false, true);
-            
+
         }
         batch.end();
 
-        obstacles.forEach(o -> o.update(delta, obstacleSpeed));
-        obstacles.removeIf(o -> o.getX() + 100 < 0);
-
-    }
-
-    // NY METOD FÖR HOPP
-    private void jump() {
-        velocity = 600;
-    }
-
-    @Override
-    public void dispose() {
-        batch.dispose();
-        characterImage.dispose();
-        startImage.dispose();
-        obstacleImage.dispose();
     }
 }
