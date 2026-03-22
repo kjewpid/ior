@@ -13,11 +13,19 @@ import com.badlogic.gdx.math.Rectangle;
 import java.util.ArrayList;
 
 public class Game extends ApplicationAdapter {
+    private enum GameState {
+        START,
+        PLAYING,
+        GAME_OVER
+    }
+
     private float characterY = 540;
     private float velocity = 600;
     private float gravity = -1500;
-    private boolean gameStarted = false;
+    private GameState state = GameState.START;
     private SpriteBatch batch;
+    private boolean isDying = false;
+    private boolean finishedDying = false;
 
     //StartImage
     private float buttonWidth = 400;
@@ -55,20 +63,27 @@ public class Game extends ApplicationAdapter {
     public void render() {
         Gdx.gl.glClearColor(0.5f, 0.8f, 1f, 1);  // Tillfälligt för att se bakgrund
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        if (!gameStarted) {
-            startGame();
-            renderStartButton();
-            return;
-            // Generera bakgrund här senare
-        }
-
         float delta = Gdx.graphics.getDeltaTime();
-
-        handleInput();
-        updateGame(delta);
-        renderGame();
-        checkCollision();
+        switch (state) {
+            case START:
+                startGame();
+                renderStartButton();
+                break;
+            case PLAYING:
+                handleInput();
+                updateGame(delta);
+                renderGame();
+                checkCollision();
+                break;
+            case GAME_OVER:
+                //GameOverScreen method
+                if (!finishedDying) {
+                    updateCharacter(delta);
+                    renderGame();
+                }
+                handleGameOverInput();
+                break;
+        }
     }
 
     @Override
@@ -86,7 +101,7 @@ public class Game extends ApplicationAdapter {
 
     private void startGame() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            gameStarted = true;
+            state = GameState.PLAYING;
             jump();
         }
     }
@@ -118,19 +133,26 @@ public class Game extends ApplicationAdapter {
             }
         }
 
-        velocity += gravity * delta;
+        if (!isDying) {
+            velocity += gravity * delta;
+        } else {
+            velocity += gravity * 1.5 * delta;
+        }
         characterY += velocity * delta;
 
-        if (characterY > screenHeight) {
+        if (characterY > screenHeight && !isDying) {
             characterY = screenHeight;
             velocity = 0;
         }
 
-        if (characterY < 0) {
+        if (!isDying && characterY < 0) {
             characterY = 0;
-            if (velocity < 0) {
-                velocity = 0;
-            }
+            velocity = 0;
+        }
+
+        if (isDying && characterY < -120) {
+            velocity = 0;
+            finishedDying = true;
         }
     }
 
@@ -177,31 +199,50 @@ public class Game extends ApplicationAdapter {
 
     }
 
-    private Circle getCharacterArea(){
+    private Circle getCharacterArea() {
         float radius = 60;
         float centerX = startX;
         float centerY = characterY;
         return new Circle(centerX, centerY, radius);
     }
+
     private void checkCollision() {
         Circle character = getCharacterArea();
 
-        for (Obstacle o : obstacles){
+        for (Obstacle o : obstacles) {
             Rectangle topRectangle = new Rectangle(o.getX(), 0, 100, o.getGapY());
             Rectangle bottomRectangle = new Rectangle(o.getX(), o.getGapY() + o.getGapHeight(), 100,
                 Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()));
 
-            if (Intersector.overlaps(character, topRectangle) || Intersector.overlaps(character, bottomRectangle)){
+            if (Intersector.overlaps(character, topRectangle) || Intersector.overlaps(character, bottomRectangle)) {
                 gameOver();
             }
         }
     }
 
-    private void gameOver(){
-        gameStarted = false;
-        die();
+    private void gameOver() {
+        state = GameState.GAME_OVER;
+        isDying = true;
     }
-    private void die() {
-        velocity = 0;
+
+    private void handleGameOverInput() {
+        if (finishedDying && Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            restartGame();
+        }
+    }
+
+    private void restartGame() {
+        startX = -120;
+        characterY = 540;
+        velocity = 600;
+
+        obstacles.clear();
+        spawnTimer = 0;
+        totalObstaclesSpawned = 0;
+
+        obstacleSpeed = 200;
+        spawnRate = obstacleDistance / obstacleSpeed;
+
+        state = GameState.PLAYING;
     }
 }
