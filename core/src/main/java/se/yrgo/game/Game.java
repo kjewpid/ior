@@ -43,8 +43,8 @@ public class Game extends ApplicationAdapter {
     private float flySpeed = 600;
 
     //Hinder
-    private float obstacleDistance = 500;
-    private float obstacleSpeed = 200;
+    private float obstacleDistance = 700;
+    private float obstacleSpeed = 250;
     private float spawnRate = obstacleDistance / obstacleSpeed;
     private Texture obstacleImage;
     private ArrayList<Obstacle> obstacles = new ArrayList<>();
@@ -219,10 +219,6 @@ public class Game extends ApplicationAdapter {
         font.draw(batch, scoreText, x, y);
 
         font.draw(batch, highScoreText, 20, Gdx.graphics.getHeight() - 20);
-        /* Osäker över denna metod, på fel ställe men ska man få poäng för att ha pressat enter?
-        if (Gdx.input.justTouched()) {
-            scoreManager.incrementPoint();
-        } */
 
         if (scoreManager.getScore() == scoreManager.getHighScore()
             && scoreManager.getScore() > 0 && !newHighscorePlayed) {
