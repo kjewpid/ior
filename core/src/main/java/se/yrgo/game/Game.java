@@ -182,7 +182,8 @@ public class Game extends ApplicationAdapter {
 
         if (spawnTimer > spawnRate) { // Spawna hinder varje x sekund
             float gapHeight = 300;
-            float gapY = (float) (Math.random() * (Gdx.graphics.getHeight() - gapHeight - 50));
+            float minObstacleHeight = 100;
+            float gapY = minObstacleHeight + (float) (Math.random() * (Gdx.graphics.getHeight() - gapHeight - 2 * minObstacleHeight));
             obstacles.add(new Obstacle(Gdx.graphics.getWidth(), gapY, obstacleImage));
             spawnTimer -= spawnRate;
 
