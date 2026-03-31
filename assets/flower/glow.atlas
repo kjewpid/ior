@@ -1,0 +1,147 @@
+glow.png
+size: 2048, 1536
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+pma: false
+glow
+  bounds: 0, 0, 256, 256
+  index: 1
+glow
+  bounds: 256, 0, 256, 256
+  index: 2
+glow
+  bounds: 512, 0, 256, 256
+  index: 3
+glow
+  bounds: 768, 0, 256, 256
+  index: 4
+glow
+  bounds: 1024, 0, 256, 256
+  index: 5
+glow
+  bounds: 1280, 0, 256, 256
+  index: 6
+glow
+  bounds: 1536, 0, 256, 256
+  index: 7
+glow
+  bounds: 1792, 0, 256, 256
+  index: 8
+glow
+  bounds: 0, 256, 256, 256
+  index: 9
+glow
+  bounds: 256, 256, 256, 256
+  index: 10
+glow
+  bounds: 512, 256, 256, 256
+  index: 11
+glow
+  bounds: 768, 256, 256, 256
+  index: 12
+glow
+  bounds: 1024, 256, 256, 256
+  index: 13
+glow
+  bounds: 1280, 256, 256, 256
+  index: 14
+glow
+  bounds: 1536, 256, 256, 256
+  index: 15
+glow
+  bounds: 1792, 256, 256, 256
+  index: 16
+glow
+  bounds: 0, 512, 256, 256
+  index: 17
+glow
+  bounds: 256, 512, 256, 256
+  index: 18
+glow
+  bounds: 512, 512, 256, 256
+  index: 19
+glow
+  bounds: 768, 512, 256, 256
+  index: 20
+glow
+  bounds: 1024, 512, 256, 256
+  index: 21
+glow
+  bounds: 1280, 512, 256, 256
+  index: 22
+glow
+  bounds: 1536, 512, 256, 256
+  index: 23
+glow
+  bounds: 1792, 512, 256, 256
+  index: 24
+glow
+  bounds: 0, 768, 256, 256
+  index: 25
+glow
+  bounds: 256, 768, 256, 256
+  index: 26
+glow
+  bounds: 512, 768, 256, 256
+  index: 27
+glow
+  bounds: 768, 768, 256, 256
+  index: 28
+glow
+  bounds: 1024, 768, 256, 256
+  index: 29
+glow
+  bounds: 1280, 768, 256, 256
+  index: 30
+glow
+  bounds: 1536, 768, 256, 256
+  index: 31
+glow
+  bounds: 1792, 768, 256, 256
+  index: 32
+glow
+  bounds: 0, 1024, 256, 256
+  index: 33
+glow
+  bounds: 256, 1024, 256, 256
+  index: 34
+glow
+  bounds: 512, 1024, 256, 256
+  index: 35
+glow
+  bounds: 768, 1024, 256, 256
+  index: 36
+glow
+  bounds: 1024, 1024, 256, 256
+  index: 37
+glow
+  bounds: 1280, 1024, 256, 256
+  index: 38
+glow
+  bounds: 1536, 1024, 256, 256
+  index: 39
+glow
+  bounds: 1792, 1024, 256, 256
+  index: 40
+glow
+  bounds: 0, 1280, 256, 256
+  index: 41
+glow
+  bounds: 256, 1280, 256, 256
+  index: 42
+glow
+  bounds: 512, 1280, 256, 256
+  index: 43
+glow
+  bounds: 768, 1280, 256, 256
+  index: 44
+glow
+  bounds: 1024, 1280, 256, 256
+  index: 45
+glow
+  bounds: 1280, 1280, 256, 256
+  index: 46
+glow
+  bounds: 1536, 1280, 256, 256
+  index: 47

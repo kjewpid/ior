@@ -1,0 +1,147 @@
+flower.png
+size: 2048, 1536
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+pma: false
+flower
+  bounds: 0, 0, 256, 256
+  index: 1
+flower
+  bounds: 256, 0, 256, 256
+  index: 2
+flower
+  bounds: 512, 0, 256, 256
+  index: 3
+flower
+  bounds: 768, 0, 256, 256
+  index: 4
+flower
+  bounds: 1024, 0, 256, 256
+  index: 5
+flower
+  bounds: 1280, 0, 256, 256
+  index: 6
+flower
+  bounds: 1536, 0, 256, 256
+  index: 7
+flower
+  bounds: 1792, 0, 256, 256
+  index: 8
+flower
+  bounds: 0, 256, 256, 256
+  index: 9
+flower
+  bounds: 256, 256, 256, 256
+  index: 10
+flower
+  bounds: 512, 256, 256, 256
+  index: 11
+flower
+  bounds: 768, 256, 256, 256
+  index: 12
+flower
+  bounds: 1024, 256, 256, 256
+  index: 13
+flower
+  bounds: 1280, 256, 256, 256
+  index: 14
+flower
+  bounds: 1536, 256, 256, 256
+  index: 15
+flower
+  bounds: 1792, 256, 256, 256
+  index: 16
+flower
+  bounds: 0, 512, 256, 256
+  index: 17
+flower
+  bounds: 256, 512, 256, 256
+  index: 18
+flower
+  bounds: 512, 512, 256, 256
+  index: 19
+flower
+  bounds: 768, 512, 256, 256
+  index: 20
+flower
+  bounds: 1024, 512, 256, 256
+  index: 21
+flower
+  bounds: 1280, 512, 256, 256
+  index: 22
+flower
+  bounds: 1536, 512, 256, 256
+  index: 23
+flower
+  bounds: 1792, 512, 256, 256
+  index: 24
+flower
+  bounds: 0, 768, 256, 256
+  index: 25
+flower
+  bounds: 256, 768, 256, 256
+  index: 26
+flower
+  bounds: 512, 768, 256, 256
+  index: 27
+flower
+  bounds: 768, 768, 256, 256
+  index: 28
+flower
+  bounds: 1024, 768, 256, 256
+  index: 29
+flower
+  bounds: 1280, 768, 256, 256
+  index: 30
+flower
+  bounds: 1536, 768, 256, 256
+  index: 31
+flower
+  bounds: 1792, 768, 256, 256
+  index: 32
+flower
+  bounds: 0, 1024, 256, 256
+  index: 33
+flower
+  bounds: 256, 1024, 256, 256
+  index: 34
+flower
+  bounds: 512, 1024, 256, 256
+  index: 35
+flower
+  bounds: 768, 1024, 256, 256
+  index: 36
+flower
+  bounds: 1024, 1024, 256, 256
+  index: 37
+flower
+  bounds: 1280, 1024, 256, 256
+  index: 38
+flower
+  bounds: 1536, 1024, 256, 256
+  index: 39
+flower
+  bounds: 1792, 1024, 256, 256
+  index: 40
+flower
+  bounds: 0, 1280, 256, 256
+  index: 41
+flower
+  bounds: 256, 1280, 256, 256
+  index: 42
+flower
+  bounds: 512, 1280, 256, 256
+  index: 43
+flower
+  bounds: 768, 1280, 256, 256
+  index: 44
+flower
+  bounds: 1024, 1280, 256, 256
+  index: 45
+flower
+  bounds: 1280, 1280, 256, 256
+  index: 46
+flower
+  bounds: 1536, 1280, 256, 256
+  index: 47
