@@ -314,6 +314,7 @@ public class Game extends ApplicationAdapter {
         spawnRate = obstacleDistance / obstacleSpeed;
 
         scoreManager.resetScore();
+        newHighscorePlayed = false;
 
         isDying = false;
         finishedDying = false;
