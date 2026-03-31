@@ -35,15 +35,19 @@ public class Game extends ApplicationAdapter {
     private Texture startImage;
 
     // Karaktär
-    private Texture characterImage;
     private float startX = -120;
     private float characterX = 400;
     private float flySpeed = 600;
 
-    private Animation<TextureRegion> beeAnimation;
-    private Animation<TextureRegion> wingsAnimation;
-    private float stateTime = 0f;
+    private TextureAtlas beeBodyAtlas;
+    private TextureAtlas frontWingAtlas;
 
+    private TextureAtlas backWingAtlas;
+    private Animation<TextureRegion> bodyAnimation;
+    private Animation<TextureRegion> frontWingAnimation;
+    private Animation<TextureRegion> backWingAnimation;
+
+    private float stateTime = 0f;
     //Hinder
     private float obstacleDistance = 700;
     private float obstacleSpeed = 250;
@@ -63,11 +67,18 @@ public class Game extends ApplicationAdapter {
     @Override
     public void create() {
         batch = new SpriteBatch();
-        characterImage = new Texture(Gdx.files.internal("Character.png"));
         startImage = new Texture(Gdx.files.internal("StartImage.png"));
         obstacleImage = new Texture("Obstacle.JPG");
         buttonX = (Gdx.graphics.getWidth() - buttonWidth) / 2;
         buttonY = (Gdx.graphics.getHeight() - buttonHeight) / 2;
+
+        beeBodyAtlas = new TextureAtlas(Gdx.files.internal("bee/bee.atlas"));
+        frontWingAtlas = new TextureAtlas(Gdx.files.internal("bee/wings_front.atlas"));
+        backWingAtlas = new TextureAtlas(Gdx.files.internal("bee/wings_back.atlas"));
+
+        bodyAnimation = new Animation<>(0.1f, beeBodyAtlas.getRegions(), Animation.PlayMode.LOOP);
+        frontWingAnimation = new Animation<>(0.1f, frontWingAtlas.getRegions(), Animation.PlayMode.LOOP);
+        backWingAnimation = new Animation<>(0.1f, backWingAtlas.getRegions(), Animation.PlayMode.LOOP);
 
         scoreManager = new ScoreManager();
         font = new BitmapFont();
@@ -109,7 +120,6 @@ public class Game extends ApplicationAdapter {
     @Override
     public void dispose() {
         batch.dispose();
-        characterImage.dispose();
         startImage.dispose();
         obstacleImage.dispose();
         highscoreSound.dispose();
@@ -177,6 +187,8 @@ public class Game extends ApplicationAdapter {
             velocity = 0;
             finishedDying = true;
         }
+
+        stateTime += Gdx.graphics.getDeltaTime();
     }
 
     private void spawnObstacles(float delta) {
@@ -223,8 +235,7 @@ public class Game extends ApplicationAdapter {
 
         font.draw(batch, highScoreText, 20, Gdx.graphics.getHeight() - 20);
 
-        if (scoreManager.getScore() == scoreManager.getHighScore()
-            && scoreManager.getScore() > 0 && !newHighscorePlayed) {
+        if (scoreManager.getScore() == scoreManager.getHighScore() && scoreManager.getScore() > 0 && !newHighscorePlayed) {
             highscoreSound.play(0.7f);
             newHighscorePlayed = true;
         }
@@ -232,7 +243,21 @@ public class Game extends ApplicationAdapter {
 
     private void renderGame() {
         batch.begin();
-        batch.draw(characterImage, startX - 30, characterY - 30, 120, 120);
+        TextureRegion bodyFrame = bodyAnimation.getKeyFrame(stateTime);
+        TextureRegion frontWingFrame = frontWingAnimation.getKeyFrame(stateTime);
+        TextureRegion backWingFrame = backWingAnimation.getKeyFrame(stateTime);
+
+        float width = 120;
+        float height = 120;
+
+// Draw back wing first
+        batch.draw(backWingFrame, startX - width / 2, characterY - height / 2, width, height);
+
+// Draw body
+        batch.draw(bodyFrame, startX - width / 2, characterY - height / 2, width, height);
+
+// Draw front wing on top
+        batch.draw(frontWingFrame, startX - width / 2, characterY - height / 2, width, height);
 
         for (Obstacle o : obstacles) {
             batch.draw(obstacleImage, o.getX(), 0, 100, o.getGapY());
