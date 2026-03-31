@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.Rectangle;
 import java.util.ArrayList;
 
 import com.badlogic.gdx.audio.Music;
+import org.w3c.dom.Text;
 
 public class Game extends ApplicationAdapter {
     private enum GameState {
@@ -55,6 +56,7 @@ public class Game extends ApplicationAdapter {
     private Animation<TextureRegion> deadBackWingAnimation;
 
     private float stateTime = 0f;
+
     // Hinder
     private float obstacleDistance = 700;
     private float obstacleSpeed = 250;
@@ -68,6 +70,14 @@ public class Game extends ApplicationAdapter {
     private ScoreManager scoreManager;
     private BitmapFont font;
     private GlyphLayout layout;
+
+    private TextureAtlas flowerAtlas;
+    private TextureAtlas flowerGlowAtlas;
+    private Animation<TextureRegion> flowerAnimation;
+    private Animation<TextureRegion> flowerGlowAnimation;
+
+    private float flowerX;
+    private float flowerY;
 
     // Ljud
     private Music backgroundMusic;
@@ -101,8 +111,13 @@ public class Game extends ApplicationAdapter {
         deadBackWingAtlas = new TextureAtlas(Gdx.files.internal("bee/bee_dead_back_wings.atlas"));
 
         deadBodyAnimation = new Animation<>(0.08f, deadBodyAtlas.getRegions(), Animation.PlayMode.NORMAL);
-        deadFrontWingAnimation = new Animation<>(0.08f, deadFrontWingAtlas.getRegions(), Animation.PlayMode.NORMAL);
-        deadBackWingAnimation = new Animation<>(0.08f, deadBackWingAtlas.getRegions(), Animation.PlayMode.NORMAL);
+        deadFrontWingAnimation = new Animation<>(0.08f, deadFrontWingAtlas.getRegions(), Animation.PlayMode.LOOP);
+        deadBackWingAnimation = new Animation<>(0.08f, deadBackWingAtlas.getRegions(), Animation.PlayMode.LOOP);
+
+        flowerAtlas = new TextureAtlas(Gdx.files.internal("flower/flower.atlas"));
+        flowerGlowAtlas = new TextureAtlas(Gdx.files.internal("flower/glow.atlas"));
+        flowerAnimation = new Animation<>(0.1f, flowerAtlas.getRegions(), Animation.PlayMode.LOOP);
+        flowerGlowAnimation = new Animation<>(0.1f, flowerGlowAtlas.getRegions(), Animation.PlayMode.LOOP);
 
         scoreManager = new ScoreManager();
         font = new BitmapFont();
@@ -187,7 +202,7 @@ public class Game extends ApplicationAdapter {
         spawnObstacles(delta);
         updateObstacles(delta);
 
-        // Blommor 
+        // Blommor
         // Slumpmässig spawn av blommor
         if (Math.random() < 0.02) { // ca 2% chans varje frame
             float y = 50 + (float) (Math.random() * (Gdx.graphics.getHeight() - 100));
@@ -238,6 +253,7 @@ public class Game extends ApplicationAdapter {
         if (!isDying && characterY < 0) {
             characterY = 0;
             velocity = 0;
+            gameOver();
         }
 
         if (isDying && characterY < -120) {
@@ -301,60 +317,78 @@ public class Game extends ApplicationAdapter {
         }
     }
 
-   private void renderGame() {
-    batch.begin();
 
-    // Rita hindren först
-    for (Obstacle o : obstacles) {
-        batch.draw(obstacleImage, o.getX(), 0, 100, o.getGapY());
-        batch.draw(obstacleImage, o.getX(), o.getGapY() + o.getGapHeight(), 100,
-                Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()), 0, 0,
-                obstacleImage.getWidth(), obstacleImage.getHeight(), false, true);
+    private void renderGame() {
+        batch.begin();
+        batch.begin();
+        renderFlower();
+        renderBee();
+        for (Obstacle o : obstacles) {
+            batch.draw(obstacleImage, o.getX(), 0, 100, o.getGapY());
+                batch.draw(obstacleImage, o.getX(), 0, 100, o.getGapY());
+                batch.draw(obstacleImage, o.getX(), o.getGapY() + o.getGapHeight(), 100,
+                    Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()), 0, 0,
+                    obstacleImage.getWidth(), obstacleImage.getHeight(), false, true);
+        }
+        // Rita poäng
+        score();
+        batch.end();
     }
 
-    // Rita biet + blommor
-    renderBee();
-
-    // Rita poäng
-    score();
-
-    batch.end();
-}
 
     private void renderBee() {
-    TextureRegion bodyFrame;
-    TextureRegion frontWingFrame;
-    TextureRegion backWingFrame;
+        TextureRegion bodyFrame;
+        TextureRegion frontWingFrame;
+        TextureRegion backWingFrame;
 
-    if (isDying) {
-        bodyFrame = deadBodyAnimation.getKeyFrame(stateTime);
-        frontWingFrame = deadFrontWingAnimation.getKeyFrame(stateTime * 0.4f);
-        backWingFrame = deadBackWingAnimation.getKeyFrame(stateTime * 0.4f);
-    } else {
-        bodyFrame = bodyAnimation.getKeyFrame(stateTime);
-        frontWingFrame = frontWingAnimation.getKeyFrame(stateTime);
-        backWingFrame = backWingAnimation.getKeyFrame(stateTime);
+        if (isDying) {
+            bodyFrame = deadBodyAnimation.getKeyFrame(stateTime);
+            frontWingFrame = deadFrontWingAnimation.getKeyFrame(stateTime * 0.4f);
+            backWingFrame = deadBackWingAnimation.getKeyFrame(stateTime * 0.4f);
+        } else {
+            bodyFrame = bodyAnimation.getKeyFrame(stateTime);
+            frontWingFrame = frontWingAnimation.getKeyFrame(stateTime);
+            backWingFrame = backWingAnimation.getKeyFrame(stateTime);
+        }
+
+
+        float width = 120;
+        float height = 120;
+
+        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
+        batch.draw(backWingFrame, startX - width / 2, characterY - height / 2, width, height);
+
+        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        batch.draw(bodyFrame, startX - width / 2, characterY - height / 2, width, height);
+
+        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
+        batch.draw(frontWingFrame, startX - width / 2, characterY - height / 2, width, height);
+
+        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+        // Rita blommor
+        for (Flower f : flowers) {
+            batch.draw(flowerImage, f.getX(), f.getY(), 60, 60);
+        }
     }
 
-    float width = 120;
-    float height = 120;
+    private void renderFlower() {
+        TextureRegion flowerFrame;
+        TextureRegion glowFrame;
 
-    batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
-    batch.draw(backWingFrame, startX - width / 2, characterY - height / 2, width, height);
+        float width = 50;
+        float height = 50;
 
-    batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-    batch.draw(bodyFrame, startX - width / 2, characterY - height / 2, width, height);
+        flowerFrame = flowerAnimation.getKeyFrame(stateTime);
+        glowFrame = flowerGlowAnimation.getKeyFrame(stateTime);
 
-    batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
-    batch.draw(frontWingFrame, startX - width / 2, characterY - height / 2, width, height);
+        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
+        batch.draw(glowFrame, flowerX - width / 2, flowerY - height / 2, width, height);
 
-    batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-
-    // Rita blommor
-    for (Flower f : flowers) {
-        batch.draw(flowerImage, f.getX(), f.getY(), 60, 60);
+        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        // batch.setColor(1f, 0.95f, 0.95f, 2f);
+        batch.draw(flowerFrame, flowerX - width / 2, flowerY - height / 2, width, height);
     }
-}
 
     private Circle getCharacterArea() {
         float radius = 50;
