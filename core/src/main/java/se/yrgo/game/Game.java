@@ -6,9 +6,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
@@ -41,6 +39,10 @@ public class Game extends ApplicationAdapter {
     private float startX = -120;
     private float characterX = 400;
     private float flySpeed = 600;
+
+    private Animation<TextureRegion> beeAnimation;
+    private Animation<TextureRegion> wingsAnimation;
+    private float stateTime = 0f;
 
     //Hinder
     private float obstacleDistance = 700;
