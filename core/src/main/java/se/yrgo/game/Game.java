@@ -74,6 +74,10 @@ public class Game extends ApplicationAdapter {
     private Sound highscoreSound;
     private boolean newHighscorePlayed = false;
 
+    // Blommor
+    private ArrayList<Flower> flowers = new ArrayList<>();
+    private Texture flowerImage;
+
     @Override
     public void create() {
         batch = new SpriteBatch();
@@ -85,6 +89,8 @@ public class Game extends ApplicationAdapter {
         beeBodyAtlas = new TextureAtlas(Gdx.files.internal("bee/bee.atlas"));
         frontWingAtlas = new TextureAtlas(Gdx.files.internal("bee/wings_front.atlas"));
         backWingAtlas = new TextureAtlas(Gdx.files.internal("bee/wings_back.atlas"));
+
+        flowerImage = new Texture("flower.png");
 
         bodyAnimation = new Animation<>(0.07f, beeBodyAtlas.getRegions(), Animation.PlayMode.LOOP);
         frontWingAnimation = new Animation<>(0.05f, frontWingAtlas.getRegions(), Animation.PlayMode.LOOP);
@@ -180,6 +186,32 @@ public class Game extends ApplicationAdapter {
         updateCharacter(delta);
         spawnObstacles(delta);
         updateObstacles(delta);
+
+        // Blommor 
+        // Slumpmässig spawn av blommor
+        if (Math.random() < 0.02) { // ca 2% chans varje frame
+            float y = 50 + (float) (Math.random() * (Gdx.graphics.getHeight() - 100));
+            flowers.add(new Flower(Gdx.graphics.getWidth(), y));
+        }
+
+        // Uppdatera blommor, kolla collision och ta bort samlade eller missade
+        for (int i = flowers.size() - 1; i >= 0; i--) {
+            Flower f = flowers.get(i);
+            f.update(delta);
+
+            // Ta bort blommor som lämnat skärmen
+            if (f.getX() < -50 || f.isCollected()) {
+                flowers.remove(i);
+                continue;
+            }
+
+            // Kolla collision med spelaren
+            if (Intersector.overlaps(getCharacterArea(), f.getHitbox())) {
+                f.collect();
+                scoreManager.incrementPoint();
+            }
+        }
+
     }
 
     private void updateCharacter(float delta) {
@@ -312,6 +344,21 @@ public class Game extends ApplicationAdapter {
         batch.draw(frontWingFrame, startX - width / 2, characterY - height / 2, width, height);
 
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+        for (Obstacle o : obstacles) {
+            batch.draw(obstacleImage, o.getX(), 0, 100, o.getGapY());
+
+            batch.draw(obstacleImage, o.getX(), o.getGapY() + o.getGapHeight(), 100,
+                    Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()), 0, 0, obstacleImage.getWidth(),
+                    obstacleImage.getHeight(), false, true);
+        }
+
+        for (Flower f : flowers) {
+            batch.draw(flowerImage, f.getX(), f.getY(), 60, 60);
+        }
+
+        score();
+        batch.end();
     }
 
     private Circle getCharacterArea() {
