@@ -13,8 +13,7 @@ import com.badlogic.gdx.math.Rectangle;
 
 import java.util.ArrayList;
 
-import com.badlogic.gdx.audio.Sound;
-
+import com.badlogic.gdx.audio.Music;
 
 public class Game extends ApplicationAdapter {
     private enum GameState {
@@ -48,7 +47,7 @@ public class Game extends ApplicationAdapter {
     private Animation<TextureRegion> backWingAnimation;
 
     private float stateTime = 0f;
-    //Hinder
+    // Hinder
     private float obstacleDistance = 700;
     private float obstacleSpeed = 250;
     private float spawnRate = obstacleDistance / obstacleSpeed;
@@ -61,6 +60,9 @@ public class Game extends ApplicationAdapter {
     private ScoreManager scoreManager;
     private BitmapFont font;
     private GlyphLayout layout;
+
+    // Ljud
+    private Music backgroundMusic;
     private Sound highscoreSound;
     private boolean newHighscorePlayed = false;
 
@@ -88,6 +90,9 @@ public class Game extends ApplicationAdapter {
         layout = new GlyphLayout();
 
         highscoreSound = Gdx.audio.newSound(Gdx.files.internal("HighScoreSound.wav"));
+        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("MusicBackground.mp3"));
+        backgroundMusic.setLooping(true);
+        backgroundMusic.setVolume(0.5f);
     }
 
     @Override
@@ -107,7 +112,7 @@ public class Game extends ApplicationAdapter {
                 checkCollision();
                 break;
             case GAME_OVER:
-                //GameOverScreen method
+                // GameOverScreen method
                 if (!finishedDying) {
                     updateCharacter(delta);
                     renderGame();
@@ -123,7 +128,7 @@ public class Game extends ApplicationAdapter {
         startImage.dispose();
         obstacleImage.dispose();
         highscoreSound.dispose();
-
+        backgroundMusic.dispose();
     }
 
     private void jump() {
@@ -136,6 +141,10 @@ public class Game extends ApplicationAdapter {
             jump();
             newHighscorePlayed = false;
             scoreManager.resetScore();
+
+            if (!backgroundMusic.isPlaying()) {
+                backgroundMusic.play();
+            }
         }
     }
 
@@ -197,7 +206,8 @@ public class Game extends ApplicationAdapter {
         if (spawnTimer > spawnRate) { // Spawna hinder varje x sekund
             float gapHeight = 300;
             float minObstacleHeight = 100;
-            float gapY = minObstacleHeight + (float) (Math.random() * (Gdx.graphics.getHeight() - gapHeight - 2 * minObstacleHeight));
+            float gapY = minObstacleHeight
+                    + (float) (Math.random() * (Gdx.graphics.getHeight() - gapHeight - 2 * minObstacleHeight));
             obstacles.add(new Obstacle(Gdx.graphics.getWidth(), gapY, obstacleImage));
             spawnTimer -= spawnRate;
 
@@ -217,7 +227,8 @@ public class Game extends ApplicationAdapter {
         obstacles.forEach(o -> o.update(delta, obstacleSpeed));
         obstacles.removeIf(o -> o.getX() + 100 < 0);
         obstacles.forEach(o -> {
-            if (o.getX() + 50 < characterX && !o.hasPassed()) { //+50 för att x axel är i mitten av hinder, hinder är 100 brett
+            if (o.getX() + 50 < characterX && !o.hasPassed()) { // +50 för att x axel är i mitten av hinder, hinder är
+                                                                // 100 brett
                 scoreManager.incrementPoint();
                 o.setPassed();
             }
@@ -235,7 +246,8 @@ public class Game extends ApplicationAdapter {
 
         font.draw(batch, highScoreText, 20, Gdx.graphics.getHeight() - 20);
 
-        if (scoreManager.getScore() == scoreManager.getHighScore() && scoreManager.getScore() > 0 && !newHighscorePlayed) {
+        if (scoreManager.getScore() == scoreManager.getHighScore() && scoreManager.getScore() > 0
+                && !newHighscorePlayed) {
             highscoreSound.play(0.7f);
             newHighscorePlayed = true;
         }
@@ -264,7 +276,9 @@ public class Game extends ApplicationAdapter {
         for (Obstacle o : obstacles) {
             batch.draw(obstacleImage, o.getX(), 0, 100, o.getGapY());
 
-            batch.draw(obstacleImage, o.getX(), o.getGapY() + o.getGapHeight(), 100, Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()), 0, 0, obstacleImage.getWidth(), obstacleImage.getHeight(), false, true);
+            batch.draw(obstacleImage, o.getX(), o.getGapY() + o.getGapHeight(), 100,
+                    Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()), 0, 0, obstacleImage.getWidth(),
+                    obstacleImage.getHeight(), false, true);
         }
         score();
         batch.end();
@@ -282,7 +296,8 @@ public class Game extends ApplicationAdapter {
 
         for (Obstacle o : obstacles) {
             Rectangle topRectangle = new Rectangle(o.getX(), 0, 100, o.getGapY());
-            Rectangle bottomRectangle = new Rectangle(o.getX(), o.getGapY() + o.getGapHeight(), 100, Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()));
+            Rectangle bottomRectangle = new Rectangle(o.getX(), o.getGapY() + o.getGapHeight(), 100,
+                    Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()));
 
             if (Intersector.overlaps(character, topRectangle) || Intersector.overlaps(character, bottomRectangle)) {
                 gameOver();
@@ -293,6 +308,9 @@ public class Game extends ApplicationAdapter {
     private void gameOver() {
         state = GameState.GAME_OVER;
         isDying = true;
+        if (backgroundMusic.isPlaying()) {
+            backgroundMusic.pause();
+        }
     }
 
     private void handleGameOverInput() {
@@ -320,5 +338,7 @@ public class Game extends ApplicationAdapter {
         finishedDying = false;
 
         state = GameState.PLAYING;
+
+        backgroundMusic.play();
     }
 }
