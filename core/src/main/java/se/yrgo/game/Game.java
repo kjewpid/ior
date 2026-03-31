@@ -285,7 +285,7 @@ public class Game extends ApplicationAdapter {
     }
 
     private Circle getCharacterArea() {
-        float radius = 60;
+        float radius = 50;
         float centerX = startX;
         float centerY = characterY;
         return new Circle(centerX, centerY, radius);
