@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.Rectangle;
 import java.util.ArrayList;
 
 import com.badlogic.gdx.audio.Music;
+import org.w3c.dom.Text;
 
 public class Game extends ApplicationAdapter {
     private enum GameState {
@@ -55,6 +56,7 @@ public class Game extends ApplicationAdapter {
     private Animation<TextureRegion> deadBackWingAnimation;
 
     private float stateTime = 0f;
+
     // Hinder
     private float obstacleDistance = 700;
     private float obstacleSpeed = 250;
@@ -68,6 +70,14 @@ public class Game extends ApplicationAdapter {
     private ScoreManager scoreManager;
     private BitmapFont font;
     private GlyphLayout layout;
+
+    private TextureAtlas flowerAtlas;
+    private TextureAtlas flowerGlowAtlas;
+    private Animation<TextureRegion> flowerAnimation;
+    private Animation<TextureRegion> flowerGlowAnimation;
+
+    private float flowerX;
+    private float flowerY;
 
     // Ljud
     private Music backgroundMusic;
@@ -95,8 +105,13 @@ public class Game extends ApplicationAdapter {
         deadBackWingAtlas = new TextureAtlas(Gdx.files.internal("bee/bee_dead_back_wings.atlas"));
 
         deadBodyAnimation = new Animation<>(0.08f, deadBodyAtlas.getRegions(), Animation.PlayMode.NORMAL);
-        deadFrontWingAnimation = new Animation<>(0.08f, deadFrontWingAtlas.getRegions(), Animation.PlayMode.NORMAL);
-        deadBackWingAnimation = new Animation<>(0.08f, deadBackWingAtlas.getRegions(), Animation.PlayMode.NORMAL);
+        deadFrontWingAnimation = new Animation<>(0.08f, deadFrontWingAtlas.getRegions(), Animation.PlayMode.LOOP);
+        deadBackWingAnimation = new Animation<>(0.08f, deadBackWingAtlas.getRegions(), Animation.PlayMode.LOOP);
+
+        flowerAtlas = new TextureAtlas(Gdx.files.internal("flower/flower.atlas"));
+        flowerGlowAtlas = new TextureAtlas(Gdx.files.internal("flower/glow.atlas"));
+        flowerAnimation = new Animation<>(0.1f, flowerAtlas.getRegions(), Animation.PlayMode.LOOP);
+        flowerGlowAnimation = new Animation<>(0.1f, flowerGlowAtlas.getRegions(), Animation.PlayMode.LOOP);
 
         scoreManager = new ScoreManager();
         font = new BitmapFont();
@@ -206,6 +221,7 @@ public class Game extends ApplicationAdapter {
         if (!isDying && characterY < 0) {
             characterY = 0;
             velocity = 0;
+            gameOver();
         }
 
         if (isDying && characterY < -120) {
@@ -271,6 +287,7 @@ public class Game extends ApplicationAdapter {
 
     private void renderGame() {
         batch.begin();
+        renderFlower();
         renderBee();
         for (Obstacle o : obstacles) {
             batch.draw(obstacleImage, o.getX(), 0, 100, o.getGapY());
@@ -312,6 +329,24 @@ public class Game extends ApplicationAdapter {
         batch.draw(frontWingFrame, startX - width / 2, characterY - height / 2, width, height);
 
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+    }
+
+    private void renderFlower() {
+        TextureRegion flowerFrame;
+        TextureRegion glowFrame;
+
+        float width = 50;
+        float height = 50;
+
+        flowerFrame = flowerAnimation.getKeyFrame(stateTime);
+        glowFrame = flowerGlowAnimation.getKeyFrame(stateTime);
+
+        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
+        batch.draw(glowFrame, flowerX - width / 2, flowerY - height / 2, width, height);
+
+        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        // batch.setColor(1f, 0.95f, 0.95f, 2f);
+        batch.draw(flowerFrame, flowerX - width / 2, flowerY - height / 2, width, height);
     }
 
     private Circle getCharacterArea() {
