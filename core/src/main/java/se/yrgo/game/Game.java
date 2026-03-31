@@ -76,9 +76,9 @@ public class Game extends ApplicationAdapter {
         frontWingAtlas = new TextureAtlas(Gdx.files.internal("bee/wings_front.atlas"));
         backWingAtlas = new TextureAtlas(Gdx.files.internal("bee/wings_back.atlas"));
 
-        bodyAnimation = new Animation<>(0.1f, beeBodyAtlas.getRegions(), Animation.PlayMode.LOOP);
-        frontWingAnimation = new Animation<>(0.1f, frontWingAtlas.getRegions(), Animation.PlayMode.LOOP);
-        backWingAnimation = new Animation<>(0.1f, backWingAtlas.getRegions(), Animation.PlayMode.LOOP);
+        bodyAnimation = new Animation<>(0.07f, beeBodyAtlas.getRegions(), Animation.PlayMode.LOOP);
+        frontWingAnimation = new Animation<>(0.05f, frontWingAtlas.getRegions(), Animation.PlayMode.LOOP);
+        backWingAnimation = new Animation<>(0.05f, backWingAtlas.getRegions(), Animation.PlayMode.LOOP);
 
         scoreManager = new ScoreManager();
         font = new BitmapFont();
@@ -250,14 +250,16 @@ public class Game extends ApplicationAdapter {
         float width = 120;
         float height = 120;
 
-// Draw back wing first
+        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
         batch.draw(backWingFrame, startX - width / 2, characterY - height / 2, width, height);
 
-// Draw body
+        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         batch.draw(bodyFrame, startX - width / 2, characterY - height / 2, width, height);
 
-// Draw front wing on top
+        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
         batch.draw(frontWingFrame, startX - width / 2, characterY - height / 2, width, height);
+
+        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
         for (Obstacle o : obstacles) {
             batch.draw(obstacleImage, o.getX(), 0, 100, o.getGapY());
