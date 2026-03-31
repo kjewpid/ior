@@ -301,65 +301,60 @@ public class Game extends ApplicationAdapter {
         }
     }
 
-    private void renderGame() {
-        batch.begin();
-        renderBee();
-        for (Obstacle o : obstacles) {
-            batch.draw(obstacleImage, o.getX(), 0, 100, o.getGapY());
+   private void renderGame() {
+    batch.begin();
 
-            batch.draw(obstacleImage, o.getX(), o.getGapY() + o.getGapHeight(), 100,
-                Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()), 0, 0, obstacleImage.getWidth(),
-                obstacleImage.getHeight(), false, true);
-        }
-        score();
-        batch.end();
+    // Rita hindren först
+    for (Obstacle o : obstacles) {
+        batch.draw(obstacleImage, o.getX(), 0, 100, o.getGapY());
+        batch.draw(obstacleImage, o.getX(), o.getGapY() + o.getGapHeight(), 100,
+                Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()), 0, 0,
+                obstacleImage.getWidth(), obstacleImage.getHeight(), false, true);
     }
+
+    // Rita biet + blommor
+    renderBee();
+
+    // Rita poäng
+    score();
+
+    batch.end();
+}
 
     private void renderBee() {
-        TextureRegion bodyFrame;
-        TextureRegion frontWingFrame;
-        TextureRegion backWingFrame;
+    TextureRegion bodyFrame;
+    TextureRegion frontWingFrame;
+    TextureRegion backWingFrame;
 
-        if (isDying) {
-            bodyFrame = deadBodyAnimation.getKeyFrame(stateTime);
-
-            frontWingFrame = deadFrontWingAnimation.getKeyFrame(stateTime * 0.4f);
-            backWingFrame = deadBackWingAnimation.getKeyFrame(stateTime * 0.4f);
-        } else {
-            bodyFrame = bodyAnimation.getKeyFrame(stateTime);
-            frontWingFrame = frontWingAnimation.getKeyFrame(stateTime);
-            backWingFrame = backWingAnimation.getKeyFrame(stateTime);
-        }
-
-        float width = 120;
-        float height = 120;
-
-        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
-        batch.draw(backWingFrame, startX - width / 2, characterY - height / 2, width, height);
-
-        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-        batch.draw(bodyFrame, startX - width / 2, characterY - height / 2, width, height);
-
-        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
-        batch.draw(frontWingFrame, startX - width / 2, characterY - height / 2, width, height);
-
-        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-
-        for (Obstacle o : obstacles) {
-            batch.draw(obstacleImage, o.getX(), 0, 100, o.getGapY());
-
-            batch.draw(obstacleImage, o.getX(), o.getGapY() + o.getGapHeight(), 100,
-                    Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()), 0, 0, obstacleImage.getWidth(),
-                    obstacleImage.getHeight(), false, true);
-        }
-
-        for (Flower f : flowers) {
-            batch.draw(flowerImage, f.getX(), f.getY(), 60, 60);
-        }
-
-        score();
-        batch.end();
+    if (isDying) {
+        bodyFrame = deadBodyAnimation.getKeyFrame(stateTime);
+        frontWingFrame = deadFrontWingAnimation.getKeyFrame(stateTime * 0.4f);
+        backWingFrame = deadBackWingAnimation.getKeyFrame(stateTime * 0.4f);
+    } else {
+        bodyFrame = bodyAnimation.getKeyFrame(stateTime);
+        frontWingFrame = frontWingAnimation.getKeyFrame(stateTime);
+        backWingFrame = backWingAnimation.getKeyFrame(stateTime);
     }
+
+    float width = 120;
+    float height = 120;
+
+    batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
+    batch.draw(backWingFrame, startX - width / 2, characterY - height / 2, width, height);
+
+    batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+    batch.draw(bodyFrame, startX - width / 2, characterY - height / 2, width, height);
+
+    batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
+    batch.draw(frontWingFrame, startX - width / 2, characterY - height / 2, width, height);
+
+    batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+    // Rita blommor
+    for (Flower f : flowers) {
+        batch.draw(flowerImage, f.getX(), f.getY(), 60, 60);
+    }
+}
 
     private Circle getCharacterArea() {
         float radius = 50;
