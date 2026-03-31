@@ -46,6 +46,14 @@ public class Game extends ApplicationAdapter {
     private Animation<TextureRegion> frontWingAnimation;
     private Animation<TextureRegion> backWingAnimation;
 
+    private TextureAtlas deadBodyAtlas;
+    private TextureAtlas deadFrontWingAtlas;
+    private TextureAtlas deadBackWingAtlas;
+
+    private Animation<TextureRegion> deadBodyAnimation;
+    private Animation<TextureRegion> deadFrontWingAnimation;
+    private Animation<TextureRegion> deadBackWingAnimation;
+
     private float stateTime = 0f;
     // Hinder
     private float obstacleDistance = 700;
@@ -81,6 +89,14 @@ public class Game extends ApplicationAdapter {
         bodyAnimation = new Animation<>(0.07f, beeBodyAtlas.getRegions(), Animation.PlayMode.LOOP);
         frontWingAnimation = new Animation<>(0.05f, frontWingAtlas.getRegions(), Animation.PlayMode.LOOP);
         backWingAnimation = new Animation<>(0.05f, backWingAtlas.getRegions(), Animation.PlayMode.LOOP);
+
+        deadBodyAtlas = new TextureAtlas(Gdx.files.internal("bee/bee_dead.atlas"));
+        deadFrontWingAtlas = new TextureAtlas(Gdx.files.internal("bee/bee_dead_front_wings.atlas"));
+        deadBackWingAtlas = new TextureAtlas(Gdx.files.internal("bee/bee_dead_back_wings.atlas"));
+
+        deadBodyAnimation = new Animation<>(0.08f, deadBodyAtlas.getRegions(), Animation.PlayMode.NORMAL);
+        deadFrontWingAnimation = new Animation<>(0.08f, deadFrontWingAtlas.getRegions(), Animation.PlayMode.NORMAL);
+        deadBackWingAnimation = new Animation<>(0.08f, deadBackWingAtlas.getRegions(), Animation.PlayMode.NORMAL);
 
         scoreManager = new ScoreManager();
         font = new BitmapFont();
@@ -207,7 +223,7 @@ public class Game extends ApplicationAdapter {
             float gapHeight = 300;
             float minObstacleHeight = 100;
             float gapY = minObstacleHeight
-                    + (float) (Math.random() * (Gdx.graphics.getHeight() - gapHeight - 2 * minObstacleHeight));
+                + (float) (Math.random() * (Gdx.graphics.getHeight() - gapHeight - 2 * minObstacleHeight));
             obstacles.add(new Obstacle(Gdx.graphics.getWidth(), gapY, obstacleImage));
             spawnTimer -= spawnRate;
 
@@ -228,7 +244,7 @@ public class Game extends ApplicationAdapter {
         obstacles.removeIf(o -> o.getX() + 100 < 0);
         obstacles.forEach(o -> {
             if (o.getX() + 50 < characterX && !o.hasPassed()) { // +50 för att x axel är i mitten av hinder, hinder är
-                                                                // 100 brett
+                // 100 brett
                 scoreManager.incrementPoint();
                 o.setPassed();
             }
@@ -247,7 +263,7 @@ public class Game extends ApplicationAdapter {
         font.draw(batch, highScoreText, 20, Gdx.graphics.getHeight() - 20);
 
         if (scoreManager.getScore() == scoreManager.getHighScore() && scoreManager.getScore() > 0
-                && !newHighscorePlayed) {
+            && !newHighscorePlayed) {
             highscoreSound.play(0.7f);
             newHighscorePlayed = true;
         }
@@ -255,9 +271,33 @@ public class Game extends ApplicationAdapter {
 
     private void renderGame() {
         batch.begin();
-        TextureRegion bodyFrame = bodyAnimation.getKeyFrame(stateTime);
-        TextureRegion frontWingFrame = frontWingAnimation.getKeyFrame(stateTime);
-        TextureRegion backWingFrame = backWingAnimation.getKeyFrame(stateTime);
+        renderBee();
+        for (Obstacle o : obstacles) {
+            batch.draw(obstacleImage, o.getX(), 0, 100, o.getGapY());
+
+            batch.draw(obstacleImage, o.getX(), o.getGapY() + o.getGapHeight(), 100,
+                Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()), 0, 0, obstacleImage.getWidth(),
+                obstacleImage.getHeight(), false, true);
+        }
+        score();
+        batch.end();
+    }
+
+    private void renderBee() {
+        TextureRegion bodyFrame;
+        TextureRegion frontWingFrame;
+        TextureRegion backWingFrame;
+
+        if (isDying) {
+            bodyFrame = deadBodyAnimation.getKeyFrame(stateTime);
+
+            frontWingFrame = deadFrontWingAnimation.getKeyFrame(stateTime * 0.4f);
+            backWingFrame = deadBackWingAnimation.getKeyFrame(stateTime * 0.4f);
+        } else {
+            bodyFrame = bodyAnimation.getKeyFrame(stateTime);
+            frontWingFrame = frontWingAnimation.getKeyFrame(stateTime);
+            backWingFrame = backWingAnimation.getKeyFrame(stateTime);
+        }
 
         float width = 120;
         float height = 120;
@@ -272,16 +312,6 @@ public class Game extends ApplicationAdapter {
         batch.draw(frontWingFrame, startX - width / 2, characterY - height / 2, width, height);
 
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-
-        for (Obstacle o : obstacles) {
-            batch.draw(obstacleImage, o.getX(), 0, 100, o.getGapY());
-
-            batch.draw(obstacleImage, o.getX(), o.getGapY() + o.getGapHeight(), 100,
-                    Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()), 0, 0, obstacleImage.getWidth(),
-                    obstacleImage.getHeight(), false, true);
-        }
-        score();
-        batch.end();
     }
 
     private Circle getCharacterArea() {
@@ -297,7 +327,7 @@ public class Game extends ApplicationAdapter {
         for (Obstacle o : obstacles) {
             Rectangle topRectangle = new Rectangle(o.getX(), 0, 100, o.getGapY());
             Rectangle bottomRectangle = new Rectangle(o.getX(), o.getGapY() + o.getGapHeight(), 100,
-                    Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()));
+                Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()));
 
             if (Intersector.overlaps(character, topRectangle) || Intersector.overlaps(character, bottomRectangle)) {
                 gameOver();
@@ -308,6 +338,7 @@ public class Game extends ApplicationAdapter {
     private void gameOver() {
         state = GameState.GAME_OVER;
         isDying = true;
+        stateTime = 0f;
         if (backgroundMusic.isPlaying()) {
             backgroundMusic.pause();
         }

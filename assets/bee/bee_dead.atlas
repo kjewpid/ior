@@ -1,0 +1,198 @@
+bee_dead.png
+size: 2048, 2048
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+pma: false
+bee_dead
+  bounds: 0, 0, 256, 256
+  index: 1
+bee_dead
+  bounds: 256, 0, 256, 256
+  index: 2
+bee_dead
+  bounds: 512, 0, 256, 256
+  index: 3
+bee_dead
+  bounds: 768, 0, 256, 256
+  index: 4
+bee_dead
+  bounds: 1024, 0, 256, 256
+  index: 5
+bee_dead
+  bounds: 1280, 0, 256, 256
+  index: 6
+bee_dead
+  bounds: 1536, 0, 256, 256
+  index: 7
+bee_dead
+  bounds: 1792, 0, 256, 256
+  index: 8
+bee_dead
+  bounds: 0, 256, 256, 256
+  index: 9
+bee_dead
+  bounds: 256, 256, 256, 256
+  index: 10
+bee_dead
+  bounds: 512, 256, 256, 256
+  index: 11
+bee_dead
+  bounds: 768, 256, 256, 256
+  index: 12
+bee_dead
+  bounds: 1024, 256, 256, 256
+  index: 13
+bee_dead
+  bounds: 1280, 256, 256, 256
+  index: 14
+bee_dead
+  bounds: 1536, 256, 256, 256
+  index: 15
+bee_dead
+  bounds: 1792, 256, 256, 256
+  index: 16
+bee_dead
+  bounds: 0, 512, 256, 256
+  index: 17
+bee_dead
+  bounds: 256, 512, 256, 256
+  index: 18
+bee_dead
+  bounds: 512, 512, 256, 256
+  index: 19
+bee_dead
+  bounds: 768, 512, 256, 256
+  index: 20
+bee_dead
+  bounds: 1024, 512, 256, 256
+  index: 21
+bee_dead
+  bounds: 1280, 512, 256, 256
+  index: 22
+bee_dead
+  bounds: 1536, 512, 256, 256
+  index: 23
+bee_dead
+  bounds: 1792, 512, 256, 256
+  index: 24
+bee_dead
+  bounds: 0, 768, 256, 256
+  index: 25
+bee_dead
+  bounds: 256, 768, 256, 256
+  index: 26
+bee_dead
+  bounds: 512, 768, 256, 256
+  index: 27
+bee_dead
+  bounds: 768, 768, 256, 256
+  index: 28
+bee_dead
+  bounds: 1024, 768, 256, 256
+  index: 29
+bee_dead
+  bounds: 1280, 768, 256, 256
+  index: 30
+bee_dead
+  bounds: 1536, 768, 256, 256
+  index: 31
+bee_dead
+  bounds: 1792, 768, 256, 256
+  index: 32
+bee_dead
+  bounds: 0, 1024, 256, 256
+  index: 33
+bee_dead
+  bounds: 256, 1024, 256, 256
+  index: 34
+bee_dead
+  bounds: 512, 1024, 256, 256
+  index: 35
+bee_dead
+  bounds: 768, 1024, 256, 256
+  index: 36
+bee_dead
+  bounds: 1024, 1024, 256, 256
+  index: 37
+bee_dead
+  bounds: 1280, 1024, 256, 256
+  index: 38
+bee_dead
+  bounds: 1536, 1024, 256, 256
+  index: 39
+bee_dead
+  bounds: 1792, 1024, 256, 256
+  index: 40
+bee_dead
+  bounds: 0, 1280, 256, 256
+  index: 41
+bee_dead
+  bounds: 256, 1280, 256, 256
+  index: 42
+bee_dead
+  bounds: 512, 1280, 256, 256
+  index: 43
+bee_dead
+  bounds: 768, 1280, 256, 256
+  index: 44
+bee_dead
+  bounds: 1024, 1280, 256, 256
+  index: 45
+bee_dead
+  bounds: 1280, 1280, 256, 256
+  index: 46
+bee_dead
+  bounds: 1536, 1280, 256, 256
+  index: 47
+bee_dead
+  bounds: 1792, 1280, 256, 256
+  index: 48
+bee_dead
+  bounds: 0, 1536, 256, 256
+  index: 49
+bee_dead
+  bounds: 256, 1536, 256, 256
+  index: 50
+bee_dead
+  bounds: 512, 1536, 256, 256
+  index: 51
+bee_dead
+  bounds: 768, 1536, 256, 256
+  index: 52
+bee_dead
+  bounds: 1024, 1536, 256, 256
+  index: 53
+bee_dead
+  bounds: 1280, 1536, 256, 256
+  index: 54
+bee_dead
+  bounds: 1536, 1536, 256, 256
+  index: 55
+bee_dead
+  bounds: 1792, 1536, 256, 256
+  index: 56
+bee_dead
+  bounds: 0, 1792, 256, 256
+  index: 57
+bee_dead
+  bounds: 256, 1792, 256, 256
+  index: 58
+bee_dead
+  bounds: 512, 1792, 256, 256
+  index: 59
+bee_dead
+  bounds: 768, 1792, 256, 256
+  index: 60
+bee_dead
+  bounds: 1024, 1792, 256, 256
+  index: 61
+bee_dead
+  bounds: 1280, 1792, 256, 256
+  index: 62
+bee_dead
+  bounds: 1536, 1792, 256, 256
+  index: 63
+bee_dead
+  bounds: 1792, 1792, 256, 256
+  index: 64
