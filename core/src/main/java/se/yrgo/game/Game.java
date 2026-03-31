@@ -201,7 +201,10 @@ public class Game extends ApplicationAdapter {
         updateCharacter(delta);
         spawnObstacles(delta);
         updateObstacles(delta);
+        updateFlowers(delta);
+    }
 
+    private void updateFlowers(float delta) {
         // Blommor
         // Slumpmässig spawn av blommor
         if (Math.random() < 0.02) { // ca 2% chans varje frame
@@ -212,7 +215,7 @@ public class Game extends ApplicationAdapter {
         // Uppdatera blommor, kolla collision och ta bort samlade eller missade
         for (int i = flowers.size() - 1; i >= 0; i--) {
             Flower f = flowers.get(i);
-            f.update(delta);
+            f.update(delta, obstacleSpeed);
 
             // Ta bort blommor som lämnat skärmen
             if (f.getX() < -50 || f.isCollected()) {
@@ -226,7 +229,6 @@ public class Game extends ApplicationAdapter {
                 scoreManager.incrementPoint();
             }
         }
-
     }
 
     private void updateCharacter(float delta) {
@@ -317,24 +319,21 @@ public class Game extends ApplicationAdapter {
         }
     }
 
-
     private void renderGame() {
         batch.begin();
-        batch.begin();
-        renderFlower();
+        renderFlowers();
         renderBee();
         for (Obstacle o : obstacles) {
             batch.draw(obstacleImage, o.getX(), 0, 100, o.getGapY());
-                batch.draw(obstacleImage, o.getX(), 0, 100, o.getGapY());
-                batch.draw(obstacleImage, o.getX(), o.getGapY() + o.getGapHeight(), 100,
-                    Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()), 0, 0,
-                    obstacleImage.getWidth(), obstacleImage.getHeight(), false, true);
+            batch.draw(obstacleImage, o.getX(), 0, 100, o.getGapY());
+            batch.draw(obstacleImage, o.getX(), o.getGapY() + o.getGapHeight(), 100,
+                Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()), 0, 0,
+                obstacleImage.getWidth(), obstacleImage.getHeight(), false, true);
         }
         // Rita poäng
         score();
         batch.end();
     }
-
 
     private void renderBee() {
         TextureRegion bodyFrame;
@@ -365,29 +364,27 @@ public class Game extends ApplicationAdapter {
         batch.draw(frontWingFrame, startX - width / 2, characterY - height / 2, width, height);
 
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-
-        // Rita blommor
-        for (Flower f : flowers) {
-            batch.draw(flowerImage, f.getX(), f.getY(), 60, 60);
-        }
     }
 
-    private void renderFlower() {
+    private void renderFlowers() {
         TextureRegion flowerFrame;
         TextureRegion glowFrame;
 
         float width = 50;
         float height = 50;
 
-        flowerFrame = flowerAnimation.getKeyFrame(stateTime);
-        glowFrame = flowerGlowAnimation.getKeyFrame(stateTime);
+        for (Flower f : flowers) {
+            flowerFrame = flowerAnimation.getKeyFrame(stateTime);
+            glowFrame = flowerGlowAnimation.getKeyFrame(stateTime);
 
-        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
-        batch.draw(glowFrame, flowerX - width / 2, flowerY - height / 2, width, height);
+            batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
+            batch.draw(glowFrame, f.getX() - width / 2, f.getY() - height / 2, width, height);
 
+            batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+            // batch.setColor(1f, 0.95f, 0.95f, 2f);
+            batch.draw(flowerFrame, f.getX() - width / 2, f.getY() - height / 2, width, height);
+        }
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-        // batch.setColor(1f, 0.95f, 0.95f, 2f);
-        batch.draw(flowerFrame, flowerX - width / 2, flowerY - height / 2, width, height);
     }
 
     private Circle getCharacterArea() {
@@ -432,6 +429,7 @@ public class Game extends ApplicationAdapter {
         velocity = 600;
 
         obstacles.clear();
+        flowers.clear();
         spawnTimer = 0;
         totalObstaclesSpawned = 0;
 

@@ -14,8 +14,8 @@ public class Flower {
         this.y = y;
     }
 
-    public void update(float deltaTime) {
-        x -= speed * deltaTime;
+    public void update(float delta, float speed) {
+        x -= speed * delta;
     }
 
     public Circle getHitbox() {
