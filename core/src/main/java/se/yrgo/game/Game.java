@@ -92,7 +92,7 @@ public class Game extends ApplicationAdapter {
     public void create() {
         batch = new SpriteBatch();
         startImage = new Texture(Gdx.files.internal("StartImage.png"));
-        obstacleImage = new Texture("Obstacle.JPG");
+        obstacleImage = new Texture("Obstacle.PNG");
         buttonX = (Gdx.graphics.getWidth() - buttonWidth) / 2;
         buttonY = (Gdx.graphics.getHeight() - buttonHeight) / 2;
 
@@ -293,8 +293,7 @@ public class Game extends ApplicationAdapter {
         obstacles.forEach(o -> o.update(delta, obstacleSpeed));
         obstacles.removeIf(o -> o.getX() + 100 < 0);
         obstacles.forEach(o -> {
-            if (o.getX() + 50 < characterX && !o.hasPassed()) { // +50 för att x axel är i mitten av hinder, hinder är
-                // 100 brett
+            if (o.getX() + o.getObstacleWidth() / 2 < characterX && !o.hasPassed()) {
                 scoreManager.incrementPoint();
                 o.setPassed();
             }
@@ -323,13 +322,7 @@ public class Game extends ApplicationAdapter {
         batch.begin();
         renderFlowers();
         renderBee();
-        for (Obstacle o : obstacles) {
-            batch.draw(obstacleImage, o.getX(), 0, 100, o.getGapY());
-            batch.draw(obstacleImage, o.getX(), 0, 100, o.getGapY());
-            batch.draw(obstacleImage, o.getX(), o.getGapY() + o.getGapHeight(), 100,
-                Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()), 0, 0,
-                obstacleImage.getWidth(), obstacleImage.getHeight(), false, true);
-        }
+        renderObstacles();
         // Rita poäng
         score();
         batch.end();
@@ -387,6 +380,46 @@ public class Game extends ApplicationAdapter {
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
     }
 
+    private void renderObstacles() {
+        for (Obstacle o : obstacles) {
+            // Scale the image proportionally
+            float scale = o.getObstacleWidth() / obstacleImage.getWidth();
+            float scaledHeight = obstacleImage.getHeight() * scale;
+
+            // Draw bottom obstacle
+            float bottomHeight = o.getGapY();
+            batch.draw(
+                obstacleImage,
+                o.getX(),
+                0,
+                o.getObstacleWidth(),
+                Math.min(scaledHeight, bottomHeight),
+                0,
+                0,
+                obstacleImage.getWidth(),
+                (int) Math.min(obstacleImage.getHeight(), bottomHeight / scale),
+                false,
+                false
+            );
+
+            // Draw top obstacle
+            float topY = o.getGapY() + o.getGapHeight();
+            float topHeight = Gdx.graphics.getHeight() - topY;
+            batch.draw(
+                obstacleImage,
+                o.getX(),
+                topY,
+                o.getObstacleWidth(),
+                Math.min(scaledHeight, topHeight),
+                0,
+                0,
+                obstacleImage.getWidth(),
+                (int) Math.min(obstacleImage.getHeight(), topHeight / scale),
+                false,
+                true
+            );
+        }
+    }
     private Circle getCharacterArea() {
         float radius = 50;
         float centerX = startX;

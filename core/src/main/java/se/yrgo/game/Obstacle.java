@@ -6,13 +6,13 @@ public class Obstacle {
     private float x;
     private float gapY;
     private float gapHeight = 300;
-    //private Texture texture;
+    private float obstacleWidth;
     private boolean passedObstacle = false;
 
     public Obstacle(float x, float gapY, Texture texture) {
         this.x = x;
         this.gapY = gapY;
-        // this.texture = texture;
+        this.obstacleWidth = texture.getWidth() / 2;
     }
 
     public void update(float deltaTime, float speed) {
@@ -20,8 +20,7 @@ public class Obstacle {
     }
 
     public boolean isOffScreen() {
-        // return x + texture.getWidth() < 0;
-        return x + 50 < 0;
+        return x + 60 < 0;
     }
 
     public float getX() {
@@ -34,6 +33,10 @@ public class Obstacle {
 
     public float getGapHeight() {
         return gapHeight;
+    }
+
+    public float getObstacleWidth() {
+        return obstacleWidth;
     }
 
     public boolean hasPassed() {
