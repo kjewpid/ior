@@ -27,15 +27,13 @@ public class Game extends ApplicationAdapter {
     private float screenHeight;
     private float screenWidth;
 
-    private float buttonWidth = 400;
-    private float buttonHeight = 200;
-    private float buttonX, buttonY;
-    private Texture startImage;
+
 
     // Karaktär
     Character character;
     CharacterRenderer characterRenderer;
 
+    StartButton startButton;
     private float stateTime = 0f;
 
     // Hinder
@@ -75,10 +73,11 @@ public class Game extends ApplicationAdapter {
         screenHeight = Gdx.graphics.getHeight();
         screenWidth = Gdx.graphics.getWidth();
 
-        startImage = new Texture(Gdx.files.internal("StartImage.png"));
+        startButton = new StartButton(400, 200, (screenWidth - 400) / 2, (screenHeight - 200) / 2);
+        startButton.loadButton();
+
         obstacleImage = new Texture("Obstacle.PNG");
-        buttonX = (screenWidth - buttonWidth) / 2;
-        buttonY = (screenHeight- buttonHeight) / 2;
+
 
         character = new Character();
         characterRenderer = new CharacterRenderer();
@@ -114,7 +113,7 @@ public class Game extends ApplicationAdapter {
         switch (state) {
             case START:
                 startGame();
-                renderStartButton();
+                startButton.renderStartButton(batch);
                 break;
             case PLAYING:
                 handleInput();
@@ -136,7 +135,6 @@ public class Game extends ApplicationAdapter {
     @Override
     public void dispose() {
         batch.dispose();
-        startImage.dispose();
         obstacleImage.dispose();
         highscoreSound.dispose();
         backgroundMusic.dispose();
@@ -154,12 +152,6 @@ public class Game extends ApplicationAdapter {
                 backgroundMusic.play();
             }
         }
-    }
-
-    private void renderStartButton() {
-        batch.begin();
-        batch.draw(startImage, buttonX, buttonY, buttonWidth, buttonHeight);
-        batch.end();
     }
 
     private void handleInput() {
