@@ -1,4 +1,4 @@
-package se.yrgo.game;
+package se.yrgo.game.core;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -7,14 +7,16 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
-import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 
 import java.util.ArrayList;
 
 import com.badlogic.gdx.audio.Music;
-import org.w3c.dom.Text;
+import se.yrgo.game.entities.Character;
+import se.yrgo.game.entities.Flower;
+import se.yrgo.game.entities.Obstacle;
+import se.yrgo.game.renderers.CharacterRenderer;
 
 public class Game extends ApplicationAdapter {
     private enum GameState {
@@ -30,7 +32,7 @@ public class Game extends ApplicationAdapter {
 
 
     // Karaktär
-    Character character;
+    se.yrgo.game.entities.Character character;
     CharacterRenderer characterRenderer;
 
     StartButton startButton;

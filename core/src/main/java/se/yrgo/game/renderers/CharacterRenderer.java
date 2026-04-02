@@ -1,4 +1,4 @@
-package se.yrgo.game;
+package se.yrgo.game.renderers;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;

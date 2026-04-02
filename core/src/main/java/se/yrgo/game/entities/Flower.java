@@ -1,4 +1,4 @@
-package se.yrgo.game;
+package se.yrgo.game.entities;
 
 import com.badlogic.gdx.math.Circle;
 

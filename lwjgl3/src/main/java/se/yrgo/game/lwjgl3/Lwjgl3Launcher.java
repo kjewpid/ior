@@ -2,7 +2,7 @@ package se.yrgo.game.lwjgl3;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
-import se.yrgo.game.Game;
+import se.yrgo.game.core.Game;
 
 public class Lwjgl3Launcher {
 

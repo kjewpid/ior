@@ -1,4 +1,4 @@
-package se.yrgo.game;
+package se.yrgo.game.core;
 
 public class ScoreManager {
     private int score;
