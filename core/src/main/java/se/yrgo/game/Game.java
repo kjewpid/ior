@@ -21,13 +21,11 @@ public class Game extends ApplicationAdapter {
         START, PLAYING, GAME_OVER
     }
 
-    private float characterY = 540;
-    private float velocity = 600;
-    private float gravity = -1500;
     private GameState state = GameState.START;
     private SpriteBatch batch;
-    private boolean isDying = false;
-    private boolean finishedDying = false;
+
+    private float screenHeight;
+    private float screenWidth;
 
     private float buttonWidth = 400;
     private float buttonHeight = 200;
@@ -35,25 +33,8 @@ public class Game extends ApplicationAdapter {
     private Texture startImage;
 
     // Karaktär
-    private float startX = -120;
-    private float characterX = 400;
-    private float flySpeed = 600;
-
-    private TextureAtlas beeBodyAtlas;
-    private TextureAtlas frontWingAtlas;
-
-    private TextureAtlas backWingAtlas;
-    private Animation<TextureRegion> bodyAnimation;
-    private Animation<TextureRegion> frontWingAnimation;
-    private Animation<TextureRegion> backWingAnimation;
-
-    private TextureAtlas deadBodyAtlas;
-    private TextureAtlas deadFrontWingAtlas;
-    private TextureAtlas deadBackWingAtlas;
-
-    private Animation<TextureRegion> deadBodyAnimation;
-    private Animation<TextureRegion> deadFrontWingAnimation;
-    private Animation<TextureRegion> deadBackWingAnimation;
+    Character character;
+    CharacterRenderer characterRenderer;
 
     private float stateTime = 0f;
 
@@ -91,28 +72,19 @@ public class Game extends ApplicationAdapter {
     @Override
     public void create() {
         batch = new SpriteBatch();
+        screenHeight = Gdx.graphics.getHeight();
+        screenWidth = Gdx.graphics.getWidth();
+
         startImage = new Texture(Gdx.files.internal("StartImage.png"));
         obstacleImage = new Texture("Obstacle.PNG");
-        buttonX = (Gdx.graphics.getWidth() - buttonWidth) / 2;
-        buttonY = (Gdx.graphics.getHeight() - buttonHeight) / 2;
+        buttonX = (screenWidth - buttonWidth) / 2;
+        buttonY = (screenHeight- buttonHeight) / 2;
 
-        beeBodyAtlas = new TextureAtlas(Gdx.files.internal("bee/bee.atlas"));
-        frontWingAtlas = new TextureAtlas(Gdx.files.internal("bee/wings_front.atlas"));
-        backWingAtlas = new TextureAtlas(Gdx.files.internal("bee/wings_back.atlas"));
+        character = new Character();
+        characterRenderer = new CharacterRenderer();
+        characterRenderer.loadAssets();
 
         flowerImage = new Texture("flower.png");
-
-        bodyAnimation = new Animation<>(0.07f, beeBodyAtlas.getRegions(), Animation.PlayMode.LOOP);
-        frontWingAnimation = new Animation<>(0.05f, frontWingAtlas.getRegions(), Animation.PlayMode.LOOP);
-        backWingAnimation = new Animation<>(0.05f, backWingAtlas.getRegions(), Animation.PlayMode.LOOP);
-
-        deadBodyAtlas = new TextureAtlas(Gdx.files.internal("bee/bee_dead.atlas"));
-        deadFrontWingAtlas = new TextureAtlas(Gdx.files.internal("bee/bee_dead_front_wings.atlas"));
-        deadBackWingAtlas = new TextureAtlas(Gdx.files.internal("bee/bee_dead_back_wings.atlas"));
-
-        deadBodyAnimation = new Animation<>(0.08f, deadBodyAtlas.getRegions(), Animation.PlayMode.NORMAL);
-        deadFrontWingAnimation = new Animation<>(0.08f, deadFrontWingAtlas.getRegions(), Animation.PlayMode.LOOP);
-        deadBackWingAnimation = new Animation<>(0.08f, deadBackWingAtlas.getRegions(), Animation.PlayMode.LOOP);
 
         flowerAtlas = new TextureAtlas(Gdx.files.internal("flower/flower.atlas"));
         flowerGlowAtlas = new TextureAtlas(Gdx.files.internal("flower/glow.atlas"));
@@ -137,6 +109,8 @@ public class Game extends ApplicationAdapter {
         Gdx.gl.glClearColor(0.5f, 0.8f, 1f, 1); // Tillfälligt för att se bakgrund
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         float delta = Gdx.graphics.getDeltaTime();
+        stateTime += delta;
+
         switch (state) {
             case START:
                 startGame();
@@ -146,12 +120,12 @@ public class Game extends ApplicationAdapter {
                 handleInput();
                 updateGame(delta);
                 renderGame();
-                checkCollision();
+                checkCollision(delta, screenHeight);
                 break;
             case GAME_OVER:
                 // GameOverScreen method
-                if (!finishedDying) {
-                    updateCharacter(delta);
+                if (!character.isFinishedDying()) {
+                    character.updateCharacter(delta, screenHeight);
                     renderGame();
                 }
                 handleGameOverInput();
@@ -168,14 +142,11 @@ public class Game extends ApplicationAdapter {
         backgroundMusic.dispose();
     }
 
-    private void jump() {
-        velocity = 600;
-    }
 
     private void startGame() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             state = GameState.PLAYING;
-            jump();
+            character.jump();
             newHighscorePlayed = false;
             scoreManager.resetScore();
 
@@ -193,23 +164,29 @@ public class Game extends ApplicationAdapter {
 
     private void handleInput() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            jump();
+            character.jump();
         }
     }
 
     private void updateGame(float delta) {
-        updateCharacter(delta);
+        character.updateCharacter(delta, screenHeight);
+        hasHitGround();
         spawnObstacles(delta);
         updateObstacles(delta);
         updateFlowers(delta);
     }
 
+    private void hasHitGround(){
+        if (character.hasHitGround()){
+            gameOver();
+        }
+    }
     private void updateFlowers(float delta) {
         // Blommor
         // Slumpmässig spawn av blommor
         if (Math.random() < 0.02) { // ca 2% chans varje frame
-            float y = 50 + (float) (Math.random() * (Gdx.graphics.getHeight() - 100));
-            flowers.add(new Flower(Gdx.graphics.getWidth(), y));
+            float y = 50 + (float) (Math.random() * (screenHeight - 100));
+            flowers.add(new Flower(screenWidth, y));
         }
 
         // Uppdatera blommor, kolla collision och ta bort samlade eller missade
@@ -224,46 +201,11 @@ public class Game extends ApplicationAdapter {
             }
 
             // Kolla collision med spelaren
-            if (Intersector.overlaps(getCharacterArea(), f.getHitbox())) {
+            if (Intersector.overlaps(character.getCharacterArea(), f.getHitbox())) {
                 f.collect();
                 scoreManager.incrementPoint();
             }
         }
-    }
-
-    private void updateCharacter(float delta) {
-        float screenHeight = Gdx.graphics.getHeight();
-        if (startX < characterX) {
-            startX += flySpeed * delta;
-            if (startX > characterX) {
-                startX = characterX;
-            }
-        }
-
-        if (!isDying) {
-            velocity += gravity * delta;
-        } else {
-            velocity += gravity * 1.5 * delta;
-        }
-        characterY += velocity * delta;
-
-        if (characterY > screenHeight && !isDying) {
-            characterY = screenHeight;
-            velocity = 0;
-        }
-
-        if (!isDying && characterY < 0) {
-            characterY = 0;
-            velocity = 0;
-            gameOver();
-        }
-
-        if (isDying && characterY < -120) {
-            velocity = 0;
-            finishedDying = true;
-        }
-
-        stateTime += Gdx.graphics.getDeltaTime();
     }
 
     private void spawnObstacles(float delta) {
@@ -293,7 +235,7 @@ public class Game extends ApplicationAdapter {
         obstacles.forEach(o -> o.update(delta, obstacleSpeed));
         obstacles.removeIf(o -> o.getX() + 100 < 0);
         obstacles.forEach(o -> {
-            if (o.getX() + o.getObstacleWidth() / 2 < characterX && !o.hasPassed()) {
+            if (o.getX() + o.getObstacleWidth() / 2 < character.characterX() && !o.hasPassed()) {
                 scoreManager.incrementPoint();
                 o.setPassed();
             }
@@ -321,42 +263,11 @@ public class Game extends ApplicationAdapter {
     private void renderGame() {
         batch.begin();
         renderFlowers();
-        renderBee();
+        characterRenderer.renderBee(character.isDying(), stateTime, batch, character.startX(), character.characterY());
         renderObstacles();
         // Rita poäng
         score();
         batch.end();
-    }
-
-    private void renderBee() {
-        TextureRegion bodyFrame;
-        TextureRegion frontWingFrame;
-        TextureRegion backWingFrame;
-
-        if (isDying) {
-            bodyFrame = deadBodyAnimation.getKeyFrame(stateTime);
-            frontWingFrame = deadFrontWingAnimation.getKeyFrame(stateTime * 0.4f);
-            backWingFrame = deadBackWingAnimation.getKeyFrame(stateTime * 0.4f);
-        } else {
-            bodyFrame = bodyAnimation.getKeyFrame(stateTime);
-            frontWingFrame = frontWingAnimation.getKeyFrame(stateTime);
-            backWingFrame = backWingAnimation.getKeyFrame(stateTime);
-        }
-
-
-        float width = 120;
-        float height = 120;
-
-        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
-        batch.draw(backWingFrame, startX - width / 2, characterY - height / 2, width, height);
-
-        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-        batch.draw(bodyFrame, startX - width / 2, characterY - height / 2, width, height);
-
-        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
-        batch.draw(frontWingFrame, startX - width / 2, characterY - height / 2, width, height);
-
-        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
     }
 
     private void renderFlowers() {
@@ -420,22 +331,15 @@ public class Game extends ApplicationAdapter {
             );
         }
     }
-    private Circle getCharacterArea() {
-        float radius = 50;
-        float centerX = startX;
-        float centerY = characterY;
-        return new Circle(centerX, centerY, radius);
-    }
 
-    private void checkCollision() {
-        Circle character = getCharacterArea();
 
+    private void checkCollision(float delta, float screenHeight) {
         for (Obstacle o : obstacles) {
             Rectangle topRectangle = new Rectangle(o.getX(), 0, 100, o.getGapY());
             Rectangle bottomRectangle = new Rectangle(o.getX(), o.getGapY() + o.getGapHeight(), 100,
                 Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()));
 
-            if (Intersector.overlaps(character, topRectangle) || Intersector.overlaps(character, bottomRectangle)) {
+            if (Intersector.overlaps(character.getCharacterArea(), topRectangle) || Intersector.overlaps(character.getCharacterArea(), bottomRectangle)) {
                 gameOver();
             }
         }
@@ -443,7 +347,7 @@ public class Game extends ApplicationAdapter {
 
     private void gameOver() {
         state = GameState.GAME_OVER;
-        isDying = true;
+        character.setDying(true);
         stateTime = 0f;
         if (backgroundMusic.isPlaying()) {
             backgroundMusic.pause();
@@ -451,15 +355,13 @@ public class Game extends ApplicationAdapter {
     }
 
     private void handleGameOverInput() {
-        if (finishedDying && Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+        if (character.isFinishedDying() && Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             restartGame();
         }
     }
 
     private void restartGame() {
-        startX = -120;
-        characterY = 540;
-        velocity = 600;
+        character.resetCharacter(-120, 540, 600);
 
         obstacles.clear();
         flowers.clear();
@@ -472,11 +374,9 @@ public class Game extends ApplicationAdapter {
         scoreManager.resetScore();
         newHighscorePlayed = false;
 
-        isDying = false;
-        finishedDying = false;
-
         state = GameState.PLAYING;
 
+        stateTime = 0f;
         backgroundMusic.play();
     }
 }
