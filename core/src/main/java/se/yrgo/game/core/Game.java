@@ -29,10 +29,8 @@ public class Game extends ApplicationAdapter {
     private float screenHeight;
     private float screenWidth;
 
-
-
     // Karaktär
-    se.yrgo.game.entities.Character character;
+    Character character;
     CharacterRenderer characterRenderer;
 
     StartButton startButton;
