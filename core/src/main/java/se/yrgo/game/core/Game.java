@@ -29,8 +29,6 @@ public class Game extends ApplicationAdapter {
     private float screenHeight;
     private float screenWidth;
 
-
-
     // Karaktär
     se.yrgo.game.entities.Character character;
     CharacterRenderer characterRenderer;
@@ -51,6 +49,7 @@ public class Game extends ApplicationAdapter {
     private ScoreManager scoreManager;
     private BitmapFont font;
     private GlyphLayout layout;
+    private int highScoreAtStart;
 
     private TextureAtlas flowerAtlas;
     private TextureAtlas flowerGlowAtlas;
@@ -68,6 +67,7 @@ public class Game extends ApplicationAdapter {
     // Blommor
     private ArrayList<Flower> flowers = new ArrayList<>();
     private Texture flowerImage;
+    private Sound flowerSound;
 
     @Override
     public void create() {
@@ -80,7 +80,6 @@ public class Game extends ApplicationAdapter {
 
         obstacleImage = new Texture("Obstacle.PNG");
 
-
         character = new Character();
         characterRenderer = new CharacterRenderer();
         characterRenderer.loadAssets();
@@ -91,6 +90,7 @@ public class Game extends ApplicationAdapter {
         flowerGlowAtlas = new TextureAtlas(Gdx.files.internal("flower/glow.atlas"));
         flowerAnimation = new Animation<>(0.1f, flowerAtlas.getRegions(), Animation.PlayMode.LOOP);
         flowerGlowAnimation = new Animation<>(0.1f, flowerGlowAtlas.getRegions(), Animation.PlayMode.LOOP);
+        flowerSound = Gdx.audio.newSound(Gdx.files.internal("flower/pickUpFlowerSound.mp3"));
 
         scoreManager = new ScoreManager();
         font = new BitmapFont();
@@ -140,8 +140,8 @@ public class Game extends ApplicationAdapter {
         obstacleImage.dispose();
         highscoreSound.dispose();
         backgroundMusic.dispose();
+        flowerSound.dispose();
     }
-
 
     private void startGame() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
@@ -149,6 +149,7 @@ public class Game extends ApplicationAdapter {
             character.jump();
             newHighscorePlayed = false;
             scoreManager.resetScore();
+            highScoreAtStart = scoreManager.getHighScore();
 
             if (!backgroundMusic.isPlaying()) {
                 backgroundMusic.play();
@@ -170,11 +171,12 @@ public class Game extends ApplicationAdapter {
         updateFlowers(delta);
     }
 
-    private void hasHitGround(){
-        if (character.hasHitGround()){
+    private void hasHitGround() {
+        if (character.hasHitGround()) {
             gameOver();
         }
     }
+
     private void updateFlowers(float delta) {
         // Blommor
         // Slumpmässig spawn av blommor
@@ -198,6 +200,7 @@ public class Game extends ApplicationAdapter {
             if (Intersector.overlaps(character.getCharacterArea(), f.getHitbox())) {
                 f.collect();
                 scoreManager.incrementPoint();
+                flowerSound.play(0.5f);
             }
         }
     }
@@ -209,7 +212,7 @@ public class Game extends ApplicationAdapter {
             float gapHeight = 300;
             float minObstacleHeight = 100;
             float gapY = minObstacleHeight
-                + (float) (Math.random() * (Gdx.graphics.getHeight() - gapHeight - 2 * minObstacleHeight));
+                    + (float) (Math.random() * (Gdx.graphics.getHeight() - gapHeight - 2 * minObstacleHeight));
             obstacles.add(new Obstacle(Gdx.graphics.getWidth(), gapY, obstacleImage));
             spawnTimer -= spawnRate;
 
@@ -247,8 +250,7 @@ public class Game extends ApplicationAdapter {
 
         font.draw(batch, highScoreText, 20, Gdx.graphics.getHeight() - 20);
 
-        if (scoreManager.getScore() == scoreManager.getHighScore() && scoreManager.getScore() > 0
-            && !newHighscorePlayed) {
+        if (scoreManager.getScore() > highScoreAtStart && !newHighscorePlayed) {
             highscoreSound.play(0.7f);
             newHighscorePlayed = true;
         }
@@ -294,46 +296,44 @@ public class Game extends ApplicationAdapter {
             // Draw bottom obstacle
             float bottomHeight = o.getGapY();
             batch.draw(
-                obstacleImage,
-                o.getX(),
-                0,
-                o.getObstacleWidth(),
-                Math.min(scaledHeight, bottomHeight),
-                0,
-                0,
-                obstacleImage.getWidth(),
-                (int) Math.min(obstacleImage.getHeight(), bottomHeight / scale),
-                false,
-                false
-            );
+                    obstacleImage,
+                    o.getX(),
+                    0,
+                    o.getObstacleWidth(),
+                    Math.min(scaledHeight, bottomHeight),
+                    0,
+                    0,
+                    obstacleImage.getWidth(),
+                    (int) Math.min(obstacleImage.getHeight(), bottomHeight / scale),
+                    false,
+                    false);
 
             // Draw top obstacle
             float topY = o.getGapY() + o.getGapHeight();
             float topHeight = Gdx.graphics.getHeight() - topY;
             batch.draw(
-                obstacleImage,
-                o.getX(),
-                topY,
-                o.getObstacleWidth(),
-                Math.min(scaledHeight, topHeight),
-                0,
-                0,
-                obstacleImage.getWidth(),
-                (int) Math.min(obstacleImage.getHeight(), topHeight / scale),
-                false,
-                true
-            );
+                    obstacleImage,
+                    o.getX(),
+                    topY,
+                    o.getObstacleWidth(),
+                    Math.min(scaledHeight, topHeight),
+                    0,
+                    0,
+                    obstacleImage.getWidth(),
+                    (int) Math.min(obstacleImage.getHeight(), topHeight / scale),
+                    false,
+                    true);
         }
     }
-
 
     private void checkCollision(float delta, float screenHeight) {
         for (Obstacle o : obstacles) {
             Rectangle topRectangle = new Rectangle(o.getX(), 0, 100, o.getGapY());
             Rectangle bottomRectangle = new Rectangle(o.getX(), o.getGapY() + o.getGapHeight(), 100,
-                Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()));
+                    Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()));
 
-            if (Intersector.overlaps(character.getCharacterArea(), topRectangle) || Intersector.overlaps(character.getCharacterArea(), bottomRectangle)) {
+            if (Intersector.overlaps(character.getCharacterArea(), topRectangle)
+                    || Intersector.overlaps(character.getCharacterArea(), bottomRectangle)) {
                 gameOver();
             }
         }
@@ -343,6 +343,7 @@ public class Game extends ApplicationAdapter {
         state = GameState.GAME_OVER;
         character.setDying(true);
         stateTime = 0f;
+        scoreManager.checkHighScore();
         if (backgroundMusic.isPlaying()) {
             backgroundMusic.pause();
         }
@@ -367,6 +368,7 @@ public class Game extends ApplicationAdapter {
 
         scoreManager.resetScore();
         newHighscorePlayed = false;
+        highScoreAtStart = scoreManager.getHighScore();
 
         state = GameState.PLAYING;
 
