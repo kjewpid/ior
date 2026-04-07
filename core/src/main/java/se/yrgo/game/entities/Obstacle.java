@@ -5,9 +5,9 @@ import com.badlogic.gdx.graphics.Texture;
 public class Obstacle {
     private float x;
     private float gapY;
-    private float gapHeight = 300;
     private float obstacleWidth;
     private boolean passedObstacle = false;
+
 
     public Obstacle(float x, float gapY, Texture texture) {
         this.x = x;

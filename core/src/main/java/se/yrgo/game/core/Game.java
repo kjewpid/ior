@@ -11,12 +11,14 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.badlogic.gdx.audio.Music;
 import se.yrgo.game.entities.Character;
 import se.yrgo.game.entities.Flower;
 import se.yrgo.game.entities.Obstacle;
 import se.yrgo.game.renderers.CharacterRenderer;
+import se.yrgo.game.renderers.ObstacleRenderer;
 
 public class Game extends ApplicationAdapter {
     private enum GameState {
@@ -36,14 +38,8 @@ public class Game extends ApplicationAdapter {
     StartButton startButton;
     private float stateTime = 0f;
 
-    // Hinder
-    private float obstacleDistance = 700;
-    private float obstacleSpeed = 250;
-    private float spawnRate = obstacleDistance / obstacleSpeed;
-    private Texture obstacleImage;
-    private ArrayList<Obstacle> obstacles = new ArrayList<>();
-    private float spawnTimer = 0;
-    private int totalObstaclesSpawned = 0;
+    //Hinder
+    ObstacleRenderer obstacleRenderer;
 
     // Poäng
     private ScoreManager scoreManager;
@@ -78,7 +74,8 @@ public class Game extends ApplicationAdapter {
         startButton = new StartButton(400, 200, (screenWidth - 400) / 2, (screenHeight - 200) / 2);
         startButton.loadButton();
 
-        obstacleImage = new Texture("Obstacle.PNG");
+        obstacleRenderer = new ObstacleRenderer(250);
+        obstacleRenderer.loadAssets();
 
         character = new Character();
         characterRenderer = new CharacterRenderer();
@@ -121,7 +118,6 @@ public class Game extends ApplicationAdapter {
                 handleInput();
                 updateGame(delta);
                 renderGame();
-                checkCollision(delta, screenHeight);
                 break;
             case GAME_OVER:
                 // GameOverScreen method
@@ -137,7 +133,8 @@ public class Game extends ApplicationAdapter {
     @Override
     public void dispose() {
         batch.dispose();
-        obstacleImage.dispose();
+        obstacleRenderer.dispose();
+        characterRenderer.dispose();
         highscoreSound.dispose();
         backgroundMusic.dispose();
         flowerSound.dispose();
@@ -165,9 +162,17 @@ public class Game extends ApplicationAdapter {
 
     private void updateGame(float delta) {
         character.updateCharacter(delta, screenHeight);
+
         hasHitGround();
-        spawnObstacles(delta);
-        updateObstacles(delta);
+
+        obstacleRenderer.spawnObstacles(delta);
+        obstacleRenderer.updateObstacles(delta);
+
+        if (obstacleRenderer.checkCollision(character)) {
+            gameOver();
+        }
+
+        incrementPointsWhenPassedObstacle();
         updateFlowers(delta);
     }
 
@@ -188,7 +193,7 @@ public class Game extends ApplicationAdapter {
         // Uppdatera blommor, kolla collision och ta bort samlade eller missade
         for (int i = flowers.size() - 1; i >= 0; i--) {
             Flower f = flowers.get(i);
-            f.update(delta, obstacleSpeed);
+            f.update(delta, obstacleRenderer.getObstacleSpeed());
 
             // Ta bort blommor som lämnat skärmen
             if (f.getX() < -50 || f.isCollected()) {
@@ -205,39 +210,6 @@ public class Game extends ApplicationAdapter {
         }
     }
 
-    private void spawnObstacles(float delta) {
-        spawnTimer += delta;
-
-        if (spawnTimer > spawnRate) { // Spawna hinder varje x sekund
-            float gapHeight = 300;
-            float minObstacleHeight = 100;
-            float gapY = minObstacleHeight
-                    + (float) (Math.random() * (Gdx.graphics.getHeight() - gapHeight - 2 * minObstacleHeight));
-            obstacles.add(new Obstacle(Gdx.graphics.getWidth(), gapY, obstacleImage));
-            spawnTimer -= spawnRate;
-
-            totalObstaclesSpawned++;
-
-            if (totalObstaclesSpawned % 10 == 0) { // Öka spawnrate och speed
-                obstacleSpeed *= 1.1f;
-                if (obstacleSpeed >= 800) { // Max speed
-                    obstacleSpeed = 800;
-                }
-                spawnRate = obstacleDistance / obstacleSpeed;
-            }
-        }
-    }
-
-    private void updateObstacles(float delta) {
-        obstacles.forEach(o -> o.update(delta, obstacleSpeed));
-        obstacles.removeIf(o -> o.getX() + 100 < 0);
-        obstacles.forEach(o -> {
-            if (o.getX() + o.getObstacleWidth() / 2 < character.characterX() && !o.hasPassed()) {
-                scoreManager.incrementPoint();
-                o.setPassed();
-            }
-        });
-    }
 
     public void score() {
         String scoreText = "Score: " + scoreManager.getScore();
@@ -260,10 +232,19 @@ public class Game extends ApplicationAdapter {
         batch.begin();
         renderFlowers();
         characterRenderer.renderBee(character.isDying(), stateTime, batch, character.startX(), character.characterY());
-        renderObstacles();
+        obstacleRenderer.renderObstacles(batch);
         // Rita poäng
         score();
         batch.end();
+    }
+
+    private void incrementPointsWhenPassedObstacle() {
+        obstacleRenderer.getObstacles().forEach(o -> {
+            if (o.getX() + o.getObstacleWidth() / 2 < character.characterX() && !o.hasPassed()) {
+                scoreManager.incrementPoint();
+                o.setPassed();
+            }
+        });
     }
 
     private void renderFlowers() {
@@ -287,57 +268,6 @@ public class Game extends ApplicationAdapter {
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
     }
 
-    private void renderObstacles() {
-        for (Obstacle o : obstacles) {
-            // Scale the image proportionally
-            float scale = o.getObstacleWidth() / obstacleImage.getWidth();
-            float scaledHeight = obstacleImage.getHeight() * scale;
-
-            // Draw bottom obstacle
-            float bottomHeight = o.getGapY();
-            batch.draw(
-                    obstacleImage,
-                    o.getX(),
-                    0,
-                    o.getObstacleWidth(),
-                    Math.min(scaledHeight, bottomHeight),
-                    0,
-                    0,
-                    obstacleImage.getWidth(),
-                    (int) Math.min(obstacleImage.getHeight(), bottomHeight / scale),
-                    false,
-                    false);
-
-            // Draw top obstacle
-            float topY = o.getGapY() + o.getGapHeight();
-            float topHeight = Gdx.graphics.getHeight() - topY;
-            batch.draw(
-                    obstacleImage,
-                    o.getX(),
-                    topY,
-                    o.getObstacleWidth(),
-                    Math.min(scaledHeight, topHeight),
-                    0,
-                    0,
-                    obstacleImage.getWidth(),
-                    (int) Math.min(obstacleImage.getHeight(), topHeight / scale),
-                    false,
-                    true);
-        }
-    }
-
-    private void checkCollision(float delta, float screenHeight) {
-        for (Obstacle o : obstacles) {
-            Rectangle topRectangle = new Rectangle(o.getX(), 0, 100, o.getGapY());
-            Rectangle bottomRectangle = new Rectangle(o.getX(), o.getGapY() + o.getGapHeight(), 100,
-                    Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()));
-
-            if (Intersector.overlaps(character.getCharacterArea(), topRectangle)
-                    || Intersector.overlaps(character.getCharacterArea(), bottomRectangle)) {
-                gameOver();
-            }
-        }
-    }
 
     private void gameOver() {
         state = GameState.GAME_OVER;
@@ -357,14 +287,9 @@ public class Game extends ApplicationAdapter {
 
     private void restartGame() {
         character.resetCharacter(-120, 540, 600);
-
-        obstacles.clear();
+        obstacleRenderer.resetObstacles(250);
         flowers.clear();
-        spawnTimer = 0;
-        totalObstaclesSpawned = 0;
 
-        obstacleSpeed = 200;
-        spawnRate = obstacleDistance / obstacleSpeed;
 
         scoreManager.resetScore();
         newHighscorePlayed = false;
