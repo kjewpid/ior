@@ -2,6 +2,9 @@ package se.yrgo.game.core;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
+import se.yrgo.game.entities.Obstacle;
+import se.yrgo.game.entities.Character;
+import java.util.ArrayList;
 
 public class ScoreManager {
     private int score;
@@ -24,7 +27,7 @@ public class ScoreManager {
             highScore = score;
 
             prefs.putInteger("highscore", highScore);
-            prefs.flush(); 
+            prefs.flush();
         }
     }
 
@@ -38,5 +41,14 @@ public class ScoreManager {
 
     public void resetScore() {
         score = 0;
+    }
+
+    public void checkObstaclePassed(Character character, ArrayList<Obstacle> obstacles) {
+        for (Obstacle o : obstacles) {
+            if (!o.hasPassed() && o.getX() + o.getObstacleWidth()/2 < character.characterX()) {
+                incrementPoint();
+                o.setPassed();
+            }
+        }
     }
 }

@@ -3,23 +3,17 @@ package se.yrgo.game.core;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.Intersector;
-import com.badlogic.gdx.math.Rectangle;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import com.badlogic.gdx.audio.Music;
 import se.yrgo.game.entities.Character;
 import se.yrgo.game.entities.Flower;
-import se.yrgo.game.entities.Obstacle;
 import se.yrgo.game.renderers.CharacterRenderer;
 import se.yrgo.game.renderers.FlowerRenderer;
 import se.yrgo.game.renderers.ObstacleRenderer;
+import se.yrgo.game.renderers.ScoreRenderer;
 
 public class Game extends ApplicationAdapter {
     private enum GameState {
@@ -44,17 +38,13 @@ public class Game extends ApplicationAdapter {
 
     //Blommor
     FlowerRenderer flowerRenderer;
+
     // Poäng
-    private ScoreManager scoreManager;
-    private BitmapFont font;
-    private GlyphLayout layout;
-    private int highScoreAtStart;
-
-
+    ScoreRenderer scoreRenderer;
+    ScoreManager scoreManager;
     // Ljud
     private Music backgroundMusic;
-    private Sound highscoreSound;
-    private boolean newHighscorePlayed = false;
+
 
     // Blommor
 
@@ -78,13 +68,9 @@ public class Game extends ApplicationAdapter {
         flowerRenderer.loadAssets();
 
         scoreManager = new ScoreManager();
-        font = new BitmapFont();
-        font.setColor(1, 0, 0, 1);
-        font.getData().setScale(3);
+        scoreRenderer = new ScoreRenderer(scoreManager);
+        scoreRenderer.loadAssets();
 
-        layout = new GlyphLayout();
-
-        highscoreSound = Gdx.audio.newSound(Gdx.files.internal("HighScoreSound.wav"));
         backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("MusicBackground.mp3"));
         backgroundMusic.setLooping(true);
         backgroundMusic.setVolume(0.5f);
@@ -123,7 +109,7 @@ public class Game extends ApplicationAdapter {
         batch.dispose();
         obstacleRenderer.dispose();
         characterRenderer.dispose();
-        highscoreSound.dispose();
+        scoreRenderer.dispose();
         backgroundMusic.dispose();
         flowerRenderer.dispose();
     }
@@ -132,9 +118,10 @@ public class Game extends ApplicationAdapter {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             state = GameState.PLAYING;
             character.jump();
-            newHighscorePlayed = false;
+
             scoreManager.resetScore();
-            highScoreAtStart = scoreManager.getHighScore();
+            scoreRenderer.resetHighscoreFlag();
+
 
             if (!backgroundMusic.isPlaying()) {
                 backgroundMusic.play();
@@ -160,7 +147,8 @@ public class Game extends ApplicationAdapter {
             gameOver();
         }
 
-        incrementPointsWhenPassedObstacle();
+        scoreManager.checkObstaclePassed(character, obstacleRenderer.getObstacles());
+
         flowerRenderer.updateFlowers(delta, obstacleRenderer.getObstacleSpeed());
         handleFlowerCollisions();
     }
@@ -171,41 +159,14 @@ public class Game extends ApplicationAdapter {
         }
     }
 
-
-    public void score() {
-        String scoreText = "Score: " + scoreManager.getScore();
-        String highScoreText = "Highscore: " + scoreManager.getHighScore();
-
-        layout.setText(font, scoreText);
-        float x = (Gdx.graphics.getWidth() - layout.width) / 2;
-        float y = Gdx.graphics.getHeight() - 100;
-        font.draw(batch, scoreText, x, y);
-
-        font.draw(batch, highScoreText, 20, Gdx.graphics.getHeight() - 20);
-
-        if (scoreManager.getScore() > highScoreAtStart && !newHighscorePlayed) {
-            highscoreSound.play(0.7f);
-            newHighscorePlayed = true;
-        }
-    }
-
     private void renderGame() {
         batch.begin();
         flowerRenderer.renderFlowers(batch, stateTime);
         characterRenderer.renderBee(character.isDying(), stateTime, batch, character.startX(), character.characterY());
         obstacleRenderer.renderObstacles(batch);
         // Rita poäng
-        score();
+        scoreRenderer.renderScore(batch);
         batch.end();
-    }
-
-    private void incrementPointsWhenPassedObstacle() {
-        obstacleRenderer.getObstacles().forEach(o -> {
-            if (o.getX() + o.getObstacleWidth() / 2 < character.characterX() && !o.hasPassed()) {
-                scoreManager.incrementPoint();
-                o.setPassed();
-            }
-        });
     }
 
     private void handleFlowerCollisions() {
@@ -218,12 +179,13 @@ public class Game extends ApplicationAdapter {
         }
     }
 
-
     private void gameOver() {
         state = GameState.GAME_OVER;
         character.setDying(true);
         stateTime = 0f;
+
         scoreManager.checkHighScore();
+
         if (backgroundMusic.isPlaying()) {
             backgroundMusic.pause();
         }
@@ -241,9 +203,8 @@ public class Game extends ApplicationAdapter {
         flowerRenderer.clearFlowers();
 
 
-        scoreManager.resetScore();
-        newHighscorePlayed = false;
-        highScoreAtStart = scoreManager.getHighScore();
+        scoreManager.resetScore();              // ✅ Reset here too
+        scoreRenderer.resetHighscoreFlag();
 
         state = GameState.PLAYING;
 
