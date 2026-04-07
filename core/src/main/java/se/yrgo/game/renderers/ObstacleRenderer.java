@@ -13,7 +13,7 @@ import java.util.ArrayList;
 public class ObstacleRenderer {
     private float obstacleDistance = 700;
     private float obstacleSpeed;
-    private float spawnRate = obstacleDistance / obstacleSpeed;
+    private float spawnRate;
     private ArrayList<Obstacle> obstacles = new ArrayList<>();
     private float spawnTimer = 0;
     private int totalObstaclesSpawned = 0;
@@ -24,6 +24,7 @@ public class ObstacleRenderer {
 
     public ObstacleRenderer(float obstacleSpeed) {
         this.obstacleSpeed = obstacleSpeed;
+        this.spawnRate = obstacleDistance / obstacleSpeed;
     }
 
     public void loadAssets() {
@@ -52,7 +53,7 @@ public class ObstacleRenderer {
                 false);
 
             // Draw top obstacle
-            float topY = o.getGapY() + o.getGapHeight();
+            float topY = o.getGapY() + gapHeight;
             float topHeight = Gdx.graphics.getHeight() - topY;
             batch.draw(
                 obstacleImage,
@@ -100,15 +101,16 @@ public class ObstacleRenderer {
     public boolean checkCollision(Character character) {
         for (Obstacle o : obstacles) {
             Rectangle topRectangle = new Rectangle(o.getX(), 0, 100, o.getGapY());
-            Rectangle bottomRectangle = new Rectangle(o.getX(), o.getGapY() + o.getGapHeight(), 100,
-                Gdx.graphics.getHeight() - (o.getGapY() + o.getGapHeight()));
+            Rectangle bottomRectangle = new Rectangle(o.getX(), o.getGapY() + gapHeight, 100,
+                Gdx.graphics.getHeight() - (o.getGapY() + gapHeight));
 
             if (Intersector.overlaps(character.getCharacterArea(), topRectangle)
                 || Intersector.overlaps(character.getCharacterArea(), bottomRectangle)) {
                 return true;
             }
-            return false;
+
         }
+        return false;
     }
 
     public ArrayList<Obstacle> getObstacles() {
@@ -116,7 +118,7 @@ public class ObstacleRenderer {
     }
 
     public void dispose() {
-        obstacleImage.dispose();
+        if (obstacleImage != null) obstacleImage.dispose();
     }
 
     public void resetObstacles(float speed) {

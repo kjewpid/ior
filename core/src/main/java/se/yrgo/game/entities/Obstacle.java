@@ -31,10 +31,6 @@ public class Obstacle {
         return gapY;
     }
 
-    public float getGapHeight() {
-        return gapHeight;
-    }
-
     public float getObstacleWidth() {
         return obstacleWidth;
     }

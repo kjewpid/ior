@@ -18,6 +18,7 @@ import se.yrgo.game.entities.Character;
 import se.yrgo.game.entities.Flower;
 import se.yrgo.game.entities.Obstacle;
 import se.yrgo.game.renderers.CharacterRenderer;
+import se.yrgo.game.renderers.FlowerRenderer;
 import se.yrgo.game.renderers.ObstacleRenderer;
 
 public class Game extends ApplicationAdapter {
@@ -41,19 +42,14 @@ public class Game extends ApplicationAdapter {
     //Hinder
     ObstacleRenderer obstacleRenderer;
 
+    //Blommor
+    FlowerRenderer flowerRenderer;
     // Poäng
     private ScoreManager scoreManager;
     private BitmapFont font;
     private GlyphLayout layout;
     private int highScoreAtStart;
 
-    private TextureAtlas flowerAtlas;
-    private TextureAtlas flowerGlowAtlas;
-    private Animation<TextureRegion> flowerAnimation;
-    private Animation<TextureRegion> flowerGlowAnimation;
-
-    private float flowerX;
-    private float flowerY;
 
     // Ljud
     private Music backgroundMusic;
@@ -61,9 +57,6 @@ public class Game extends ApplicationAdapter {
     private boolean newHighscorePlayed = false;
 
     // Blommor
-    private ArrayList<Flower> flowers = new ArrayList<>();
-    private Texture flowerImage;
-    private Sound flowerSound;
 
     @Override
     public void create() {
@@ -81,13 +74,8 @@ public class Game extends ApplicationAdapter {
         characterRenderer = new CharacterRenderer();
         characterRenderer.loadAssets();
 
-        flowerImage = new Texture("flower.png");
-
-        flowerAtlas = new TextureAtlas(Gdx.files.internal("flower/flower.atlas"));
-        flowerGlowAtlas = new TextureAtlas(Gdx.files.internal("flower/glow.atlas"));
-        flowerAnimation = new Animation<>(0.1f, flowerAtlas.getRegions(), Animation.PlayMode.LOOP);
-        flowerGlowAnimation = new Animation<>(0.1f, flowerGlowAtlas.getRegions(), Animation.PlayMode.LOOP);
-        flowerSound = Gdx.audio.newSound(Gdx.files.internal("flower/pickUpFlowerSound.mp3"));
+        flowerRenderer = new FlowerRenderer();
+        flowerRenderer.loadAssets();
 
         scoreManager = new ScoreManager();
         font = new BitmapFont();
@@ -137,7 +125,7 @@ public class Game extends ApplicationAdapter {
         characterRenderer.dispose();
         highscoreSound.dispose();
         backgroundMusic.dispose();
-        flowerSound.dispose();
+        flowerRenderer.dispose();
     }
 
     private void startGame() {
@@ -173,40 +161,13 @@ public class Game extends ApplicationAdapter {
         }
 
         incrementPointsWhenPassedObstacle();
-        updateFlowers(delta);
+        flowerRenderer.updateFlowers(delta, obstacleRenderer.getObstacleSpeed());
+        handleFlowerCollisions();
     }
 
     private void hasHitGround() {
         if (character.hasHitGround()) {
             gameOver();
-        }
-    }
-
-    private void updateFlowers(float delta) {
-        // Blommor
-        // Slumpmässig spawn av blommor
-        if (Math.random() < 0.02) { // ca 2% chans varje frame
-            float y = 50 + (float) (Math.random() * (screenHeight - 100));
-            flowers.add(new Flower(screenWidth, y));
-        }
-
-        // Uppdatera blommor, kolla collision och ta bort samlade eller missade
-        for (int i = flowers.size() - 1; i >= 0; i--) {
-            Flower f = flowers.get(i);
-            f.update(delta, obstacleRenderer.getObstacleSpeed());
-
-            // Ta bort blommor som lämnat skärmen
-            if (f.getX() < -50 || f.isCollected()) {
-                flowers.remove(i);
-                continue;
-            }
-
-            // Kolla collision med spelaren
-            if (Intersector.overlaps(character.getCharacterArea(), f.getHitbox())) {
-                f.collect();
-                scoreManager.incrementPoint();
-                flowerSound.play(0.5f);
-            }
         }
     }
 
@@ -230,7 +191,7 @@ public class Game extends ApplicationAdapter {
 
     private void renderGame() {
         batch.begin();
-        renderFlowers();
+        flowerRenderer.renderFlowers(batch, stateTime);
         characterRenderer.renderBee(character.isDying(), stateTime, batch, character.startX(), character.characterY());
         obstacleRenderer.renderObstacles(batch);
         // Rita poäng
@@ -247,25 +208,14 @@ public class Game extends ApplicationAdapter {
         });
     }
 
-    private void renderFlowers() {
-        TextureRegion flowerFrame;
-        TextureRegion glowFrame;
-
-        float width = 50;
-        float height = 50;
-
-        for (Flower f : flowers) {
-            flowerFrame = flowerAnimation.getKeyFrame(stateTime);
-            glowFrame = flowerGlowAnimation.getKeyFrame(stateTime);
-
-            batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
-            batch.draw(glowFrame, f.getX() - width / 2, f.getY() - height / 2, width, height);
-
-            batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-            // batch.setColor(1f, 0.95f, 0.95f, 2f);
-            batch.draw(flowerFrame, f.getX() - width / 2, f.getY() - height / 2, width, height);
+    private void handleFlowerCollisions() {
+        for (Flower f : flowerRenderer.getFlowers()) {
+            if (Intersector.overlaps(character.getCharacterArea(), f.getHitbox())) {
+                f.collect();
+                scoreManager.incrementPoint();
+                flowerRenderer.getFlowerSound().play(0.5f);
+            }
         }
-        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
     }
 
 
@@ -288,7 +238,7 @@ public class Game extends ApplicationAdapter {
     private void restartGame() {
         character.resetCharacter(-120, 540, 600);
         obstacleRenderer.resetObstacles(250);
-        flowers.clear();
+        flowerRenderer.clearFlowers();
 
 
         scoreManager.resetScore();

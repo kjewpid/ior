@@ -75,7 +75,12 @@ public class CharacterRenderer {
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
     }
 
-    public void dispose(){
-
+    public void dispose() {
+        if (beeBodyAtlas != null) beeBodyAtlas.dispose();
+        if (frontWingAtlas != null) frontWingAtlas.dispose();
+        if (backWingAtlas != null) backWingAtlas.dispose();
+        if (deadBodyAtlas != null) deadBodyAtlas.dispose();
+        if (deadFrontWingAtlas != null) deadFrontWingAtlas.dispose();
+        if (deadBackWingAtlas != null) deadBackWingAtlas.dispose();
     }
 }
