@@ -203,7 +203,7 @@ public class Game extends ApplicationAdapter {
         flowerRenderer.clearFlowers();
 
 
-        scoreManager.resetScore();              // ✅ Reset here too
+        scoreManager.resetScore();
         scoreRenderer.resetHighscoreFlag();
 
         state = GameState.PLAYING;
