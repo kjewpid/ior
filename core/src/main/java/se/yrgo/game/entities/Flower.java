@@ -5,7 +5,6 @@ import com.badlogic.gdx.math.Circle;
 public class Flower {
     private float x;
     private float y;
-    private float speed = 250; // samma hastighet som hindren
     private boolean collected = false;
     private float radius = 30; // används för collision
 
