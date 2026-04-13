@@ -118,7 +118,9 @@ public class Game extends ApplicationAdapter {
     }
 
     private void startGame() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) ||
+            Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) ||
+            Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
             state = GameState.PLAYING;
             character.jump();
 
@@ -133,7 +135,9 @@ public class Game extends ApplicationAdapter {
     }
 
     private void handleInput() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) ||
+            Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) ||
+            Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
             character.jump();
         }
     }
