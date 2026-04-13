@@ -3,12 +3,12 @@ package se.yrgo.game.entities;
 import com.badlogic.gdx.graphics.Texture;
 
 public class Layer {
-    Texture texture;
-    float speed;
-    float y;
-    boolean repeat;
-    int instances;
-
+    private Texture texture;
+    private float speed;
+    private float y;
+    private boolean repeat;
+    private int instances;
+    private float scale = 1f;
     float offsetX = 0;
 
     public Layer(Texture texture, float speed, float y, boolean repeat, int instances) {
@@ -46,5 +46,13 @@ public class Layer {
 
     public void setOffsetX(float offsetX) {
         this.offsetX = offsetX;
+    }
+
+    public float getScale() {
+        return scale;
+    }
+
+    public void setScale(float scale) {
+        this.scale = scale;
     }
 }

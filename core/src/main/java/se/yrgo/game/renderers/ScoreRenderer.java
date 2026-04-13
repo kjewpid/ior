@@ -21,7 +21,6 @@ public class ScoreRenderer {
     }
 
     public void loadAssets() {
-        scoreManager = new ScoreManager();
         font = new BitmapFont();
         font.setColor(1, 0, 0, 1);
         font.getData().setScale(3);
