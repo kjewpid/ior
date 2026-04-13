@@ -10,10 +10,7 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.audio.Music;
 import se.yrgo.game.entities.Character;
 import se.yrgo.game.entities.Flower;
-import se.yrgo.game.renderers.CharacterRenderer;
-import se.yrgo.game.renderers.FlowerRenderer;
-import se.yrgo.game.renderers.ObstacleRenderer;
-import se.yrgo.game.renderers.ScoreRenderer;
+import se.yrgo.game.renderers.*;
 
 public class Game extends ApplicationAdapter {
     private enum GameState {
@@ -45,8 +42,9 @@ public class Game extends ApplicationAdapter {
     // Ljud
     private Music backgroundMusic;
 
-
-    // Blommor
+    //Bakgrund
+    private BackgroundRenderer backgroundRenderer;
+    private float cameraSpeed;
 
     @Override
     public void create() {
@@ -74,6 +72,11 @@ public class Game extends ApplicationAdapter {
         backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("MusicBackground.mp3"));
         backgroundMusic.setLooping(true);
         backgroundMusic.setVolume(0.5f);
+
+        backgroundRenderer = new BackgroundRenderer();
+        backgroundRenderer.loadAssets();
+        backgroundRenderer.setupLayers();
+        cameraSpeed = 100f;
     }
 
     @Override
@@ -136,6 +139,8 @@ public class Game extends ApplicationAdapter {
     }
 
     private void updateGame(float delta) {
+        backgroundRenderer.update(delta, cameraSpeed);
+
         character.updateCharacter(delta, screenHeight);
 
         hasHitGround();
@@ -161,6 +166,7 @@ public class Game extends ApplicationAdapter {
 
     private void renderGame() {
         batch.begin();
+        backgroundRenderer.render(batch);
         flowerRenderer.renderFlowers(batch, stateTime);
         characterRenderer.renderBee(character.isDying(), stateTime, batch, character.startX(), character.characterY());
         obstacleRenderer.renderObstacles(batch);
