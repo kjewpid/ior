@@ -4,6 +4,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.Intersector;
 
@@ -15,13 +16,20 @@ import se.yrgo.game.renderers.*;
 public class Game extends ApplicationAdapter {
     private enum GameState {
         START, MENU, PLAYING, GAME_OVER
-    }    
+    }
 
     private GameState state = GameState.START;
     private SpriteBatch batch;
 
     private float screenHeight;
     private float screenWidth;
+
+    // Svårighetsgrad
+    private Button easyButton;
+    private Button mediumButton;
+    private Button hardButton;
+    private Texture menuBackground;
+    private Difficulty difficulty;
 
     // Karaktär
     Character character;
@@ -30,10 +38,10 @@ public class Game extends ApplicationAdapter {
     StartButton startButton;
     private float stateTime = 0f;
 
-    //Hinder
+    // Hinder
     ObstacleRenderer obstacleRenderer;
 
-    //Blommor
+    // Blommor
     FlowerRenderer flowerRenderer;
 
     // Poäng
@@ -42,7 +50,7 @@ public class Game extends ApplicationAdapter {
     // Ljud
     private Music backgroundMusic;
 
-    //Bakgrund
+    // Bakgrund
     private BackgroundRenderer backgroundRenderer;
     private float cameraSpeed;
 
@@ -54,6 +62,26 @@ public class Game extends ApplicationAdapter {
 
         startButton = new StartButton(400, 200, (screenWidth - 400) / 2, (screenHeight - 200) / 2);
         startButton.loadButton();
+
+        menuBackground = new Texture(Gdx.files.internal("Menu/menu.png"));
+        difficulty = Difficulty.EASY;
+
+        float buttonWidth = new Texture(Gdx.files.internal("Menu/Easy.png")).getWidth();
+        float centerX = (screenWidth - buttonWidth) / 2;
+
+        easyButton = new Button(centerX, 660,
+                "Menu/Easy.png",
+                "Menu/Easy_hover.png");
+
+        mediumButton = new Button(
+                centerX, 450,
+                "Menu/Normal.png",
+                "Menu/Normal_hover.png");
+
+        hardButton = new Button(
+                centerX, 215,
+                "Menu/Hard.png",
+                "Menu/Hard_hover.png");
 
         obstacleRenderer = new ObstacleRenderer(250);
         obstacleRenderer.loadAssets();
@@ -91,7 +119,29 @@ public class Game extends ApplicationAdapter {
                 startGame();
                 startButton.renderStartButton(batch);
                 break;
+            case MENU:
+                handleMenu();
+
+                batch.begin();
+
+                float bgWidth = 750;
+                float bgHeight = 950;
+
+                float bgX = (screenWidth - bgWidth) / 2;
+                float bgY = (screenHeight - bgHeight) / 2;
+
+                batch.draw(menuBackground, bgX, bgY, bgWidth, bgHeight);
+
+                easyButton.render(batch);
+                mediumButton.render(batch);
+                hardButton.render(batch);
+
+                batch.end();
+                break;
             case PLAYING:
+                if (!backgroundMusic.isPlaying()) {
+                    backgroundMusic.play();
+                }
                 handleInput();
                 updateGame(delta);
                 renderGame();
@@ -119,26 +169,86 @@ public class Game extends ApplicationAdapter {
 
     private void startGame() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) ||
-            Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) ||
-            Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
-            state = GameState.PLAYING;
-            character.jump();
+                Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
 
-            scoreManager.resetScore();
-            scoreRenderer.resetHighscoreFlag();
-
-
-            if (!backgroundMusic.isPlaying()) {
-                backgroundMusic.play();
-            }
+            state = GameState.MENU;
         }
     }
 
+    private void startPlaying() {
+        state = GameState.PLAYING;
+
+        scoreManager.resetScore();
+        scoreRenderer.resetHighscoreFlag();
+
+        character.jump();
+
+        applyDifficulty();
+    }
+
+    private void applyDifficulty() {
+        switch (difficulty) {
+
+            case EASY:
+                obstacleRenderer.setSpeed(200);
+                break;
+
+            case MEDIUM:
+                obstacleRenderer.setSpeed(300);
+                break;
+
+            case HARD:
+                obstacleRenderer.setSpeed(450);
+                break;
+        }
+    }
+
+    /*
+     * private void startGame() {
+     * if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) ||
+     * Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) ||
+     * Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
+     * state = GameState.PLAYING;
+     * 
+     * character.jump();
+     * 
+     * scoreManager.resetScore();
+     * scoreRenderer.resetHighscoreFlag();
+     * 
+     * if (!backgroundMusic.isPlaying()) {
+     * backgroundMusic.play();
+     * }
+     * }
+     * }
+     */
+
     private void handleInput() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) ||
-            Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) ||
-            Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
+                Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) ||
+                Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
             character.jump();
+        }
+    }
+
+    private void handleMenu() {
+
+        easyButton.update();
+        mediumButton.update();
+        hardButton.update();
+
+        if (easyButton.isClicked()) {
+            difficulty = Difficulty.EASY;
+            startPlaying();
+        }
+
+        if (mediumButton.isClicked()) {
+            difficulty = Difficulty.MEDIUM;
+            startPlaying();
+        }
+
+        if (hardButton.isClicked()) {
+            difficulty = Difficulty.HARD;
+            startPlaying();
         }
     }
 
@@ -212,13 +322,11 @@ public class Game extends ApplicationAdapter {
         obstacleRenderer.resetObstacles(250);
         flowerRenderer.clearFlowers();
 
-
         scoreManager.resetScore();
         scoreRenderer.resetHighscoreFlag();
 
-        state = GameState.PLAYING;
+        state = GameState.MENU;
 
         stateTime = 0f;
-        backgroundMusic.play();
     }
 }

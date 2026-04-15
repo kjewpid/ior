@@ -40,33 +40,33 @@ public class ObstacleRenderer {
             // Draw bottom obstacle
             float bottomHeight = o.getGapY();
             batch.draw(
-                obstacleImage,
-                o.getX(),
-                0,
-                o.getObstacleWidth(),
-                Math.min(scaledHeight, bottomHeight),
-                0,
-                0,
-                obstacleImage.getWidth(),
-                (int) Math.min(obstacleImage.getHeight(), bottomHeight / scale),
-                false,
-                false);
+                    obstacleImage,
+                    o.getX(),
+                    0,
+                    o.getObstacleWidth(),
+                    Math.min(scaledHeight, bottomHeight),
+                    0,
+                    0,
+                    obstacleImage.getWidth(),
+                    (int) Math.min(obstacleImage.getHeight(), bottomHeight / scale),
+                    false,
+                    false);
 
             // Draw top obstacle
             float topY = o.getGapY() + gapHeight;
             float topHeight = Gdx.graphics.getHeight() - topY;
             batch.draw(
-                obstacleImage,
-                o.getX(),
-                topY,
-                o.getObstacleWidth(),
-                Math.min(scaledHeight, topHeight),
-                0,
-                0,
-                obstacleImage.getWidth(),
-                (int) Math.min(obstacleImage.getHeight(), topHeight / scale),
-                false,
-                true);
+                    obstacleImage,
+                    o.getX(),
+                    topY,
+                    o.getObstacleWidth(),
+                    Math.min(scaledHeight, topHeight),
+                    0,
+                    0,
+                    obstacleImage.getWidth(),
+                    (int) Math.min(obstacleImage.getHeight(), topHeight / scale),
+                    false,
+                    true);
         }
     }
 
@@ -77,19 +77,21 @@ public class ObstacleRenderer {
             float screenHeight = Gdx.graphics.getHeight();
             float screenWidth = Gdx.graphics.getWidth();
             float gapY = minObstacleHeight
-                + (float) (Math.random() * (screenHeight - gapHeight - 2 * minObstacleHeight));
+                    + (float) (Math.random() * (screenHeight - gapHeight - 2 * minObstacleHeight));
             obstacles.add(new Obstacle(screenWidth, gapY, obstacleImage));
             spawnTimer -= spawnRate;
 
             totalObstaclesSpawned++;
 
-            if (totalObstaclesSpawned % 10 == 0) { // Öka spawnrate och speed
-                obstacleSpeed *= 1.1f;
-                if (obstacleSpeed >= 800) { // Max speed
-                    obstacleSpeed = 800;
-                }
-                spawnRate = obstacleDistance / obstacleSpeed;
-            }
+            /*
+             * if (totalObstaclesSpawned % 10 == 0) { // Öka spawnrate och speed
+             * obstacleSpeed *= 1.1f;
+             * if (obstacleSpeed >= 800) { // Max speed
+             * obstacleSpeed = 800;
+             * }
+             * spawnRate = obstacleDistance / obstacleSpeed;
+             * }
+             */
         }
     }
 
@@ -102,10 +104,10 @@ public class ObstacleRenderer {
         for (Obstacle o : obstacles) {
             Rectangle topRectangle = new Rectangle(o.getX(), 0, 100, o.getGapY());
             Rectangle bottomRectangle = new Rectangle(o.getX(), o.getGapY() + gapHeight, 100,
-                Gdx.graphics.getHeight() - (o.getGapY() + gapHeight));
+                    Gdx.graphics.getHeight() - (o.getGapY() + gapHeight));
 
             if (Intersector.overlaps(character.getCharacterArea(), topRectangle)
-                || Intersector.overlaps(character.getCharacterArea(), bottomRectangle)) {
+                    || Intersector.overlaps(character.getCharacterArea(), bottomRectangle)) {
                 return true;
             }
 
@@ -118,7 +120,8 @@ public class ObstacleRenderer {
     }
 
     public void dispose() {
-        if (obstacleImage != null) obstacleImage.dispose();
+        if (obstacleImage != null)
+            obstacleImage.dispose();
     }
 
     public void resetObstacles(float speed) {
@@ -131,5 +134,10 @@ public class ObstacleRenderer {
 
     public float getObstacleSpeed() {
         return obstacleSpeed;
+    }
+
+    public void setSpeed(float speed) {
+        this.obstacleSpeed = speed;
+        this.spawnRate = obstacleDistance / obstacleSpeed;
     }
 }
