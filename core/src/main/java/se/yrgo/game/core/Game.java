@@ -14,8 +14,8 @@ import se.yrgo.game.renderers.*;
 
 public class Game extends ApplicationAdapter {
     private enum GameState {
-        START, PLAYING, GAME_OVER
-    }
+        START, MENU, PLAYING, GAME_OVER
+    }    
 
     private GameState state = GameState.START;
     private SpriteBatch batch;
