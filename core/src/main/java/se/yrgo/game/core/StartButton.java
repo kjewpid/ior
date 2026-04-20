@@ -23,8 +23,6 @@ public class StartButton {
     }
 
     public void renderStartButton(SpriteBatch batch) {
-        batch.begin();
         batch.draw(texture, buttonX, buttonY, buttonWidth, buttonHeight);
-        batch.end();
     }
 }

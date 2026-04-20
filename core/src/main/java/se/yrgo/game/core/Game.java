@@ -13,6 +13,8 @@ import se.yrgo.game.entities.Character;
 import se.yrgo.game.entities.Flower;
 import se.yrgo.game.renderers.*;
 
+import java.security.DigestException;
+
 public class Game extends ApplicationAdapter {
     private enum GameState {
         START, MENU, PLAYING, GAME_OVER
@@ -70,18 +72,18 @@ public class Game extends ApplicationAdapter {
         float centerX = (screenWidth - buttonWidth) / 2;
 
         easyButton = new Button(centerX, 660,
-                "Menu/Easy.png",
-                "Menu/Easy_hover.png");
+            "Menu/Easy.png",
+            "Menu/Easy_hover.png");
 
         mediumButton = new Button(
-                centerX, 450,
-                "Menu/Normal.png",
-                "Menu/Normal_hover.png");
+            centerX, 450,
+            "Menu/Normal.png",
+            "Menu/Normal_hover.png");
 
         hardButton = new Button(
-                centerX, 215,
-                "Menu/Hard.png",
-                "Menu/Hard_hover.png");
+            centerX, 215,
+            "Menu/Hard.png",
+            "Menu/Hard_hover.png");
 
         obstacleRenderer = new ObstacleRenderer(250);
         obstacleRenderer.loadAssets();
@@ -116,43 +118,16 @@ public class Game extends ApplicationAdapter {
 
         switch (state) {
             case START:
-                startGame();
-                startButton.renderStartButton(batch);
+                renderStart();
                 break;
             case MENU:
-                handleMenu();
-
-                batch.begin();
-
-                float bgWidth = 750;
-                float bgHeight = 950;
-
-                float bgX = (screenWidth - bgWidth) / 2;
-                float bgY = (screenHeight - bgHeight) / 2;
-
-                batch.draw(menuBackground, bgX, bgY, bgWidth, bgHeight);
-
-                easyButton.render(batch);
-                mediumButton.render(batch);
-                hardButton.render(batch);
-
-                batch.end();
+                renderMenu();
                 break;
             case PLAYING:
-                if (!backgroundMusic.isPlaying()) {
-                    backgroundMusic.play();
-                }
-                handleInput();
-                updateGame(delta);
-                renderGame();
+                renderPlaying(delta);
                 break;
             case GAME_OVER:
-                // GameOverScreen method
-                if (!character.isFinishedDying()) {
-                    character.updateCharacter(delta, screenHeight);
-                    renderGame();
-                }
-                handleGameOverInput();
+                renderGameOver(delta);
                 break;
         }
     }
@@ -171,9 +146,52 @@ public class Game extends ApplicationAdapter {
         easyButton.dispose();
     }
 
+    private void renderStart() {
+        startGame();
+        batch.begin();
+        startButton.renderStartButton(batch);
+        batch.end();
+    }
+
+    private void renderMenu() {
+        handleMenu();
+        batch.begin();
+
+        float bgWidth = 750;
+        float bgHeight = 950;
+
+        float bgX = (screenWidth - bgWidth) / 2;
+        float bgY = (screenHeight - bgHeight) / 2;
+
+        batch.draw(menuBackground, bgX, bgY, bgWidth, bgHeight);
+
+        easyButton.render(batch);
+        mediumButton.render(batch);
+        hardButton.render(batch);
+
+        batch.end();
+    }
+
+    private void renderPlaying(float delta) {
+        if (!backgroundMusic.isPlaying()) {
+            backgroundMusic.play();
+        }
+        handleInput();
+        updateGame(delta);
+        renderGame();
+    }
+
+    private void renderGameOver(float delta) {
+        if (!character.isFinishedDying()) {
+            character.updateCharacter(delta, screenHeight);
+            renderGame();
+        }
+        handleGameOverInput();
+    }
+
     private void startGame() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) ||
-                Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+            Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
 
             state = GameState.MENU;
         }
@@ -228,32 +246,31 @@ public class Game extends ApplicationAdapter {
 
     private void handleInput() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) ||
-                Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) ||
-                Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
+            Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) ||
+            Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
             character.jump();
         }
     }
 
     private void handleMenu() {
-
         easyButton.update();
         mediumButton.update();
         hardButton.update();
 
         if (easyButton.isClicked()) {
-            difficulty = Difficulty.EASY;
-            startPlaying();
+            requestStart(Difficulty.EASY);
         }
-
         if (mediumButton.isClicked()) {
-            difficulty = Difficulty.MEDIUM;
-            startPlaying();
+            requestStart(Difficulty.MEDIUM);
         }
-
         if (hardButton.isClicked()) {
-            difficulty = Difficulty.HARD;
-            startPlaying();
+            requestStart(Difficulty.HARD);
         }
+    }
+
+    private void requestStart(Difficulty diff) {
+        difficulty = diff;
+        startPlaying();
     }
 
     private void updateGame(float delta) {
