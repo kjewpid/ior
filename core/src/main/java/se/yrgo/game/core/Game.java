@@ -233,7 +233,7 @@ public class Game extends ApplicationAdapter {
 
     private void updateGame(float delta) {
         backgroundRenderer.update(delta, cameraSpeed);
-
+        updateMusic();
         character.updateCharacter(delta, screenHeight);
 
         hasHitGround();
@@ -286,7 +286,7 @@ public class Game extends ApplicationAdapter {
         scoreManager.checkHighScore();
 
         if (backgroundMusic.isPlaying()) {
-            backgroundMusic.pause();
+            resetMusic();
         }
     }
 
@@ -296,6 +296,23 @@ public class Game extends ApplicationAdapter {
         }
     }
 
+    private void updateMusic() {
+        if (state == GameState.PLAYING) {
+            if (!backgroundMusic.isPlaying()) {
+                backgroundMusic.play();
+            }
+        } else {
+            if (backgroundMusic.isPlaying()) {
+                backgroundMusic.stop();
+            }
+        }
+    }
+
+    private void resetMusic() {
+        backgroundMusic.stop();
+        backgroundMusic.setPosition(0f);
+    }
+
     private void restartGame() {
         character.resetCharacter(-120, 540, 600);
         obstacleRenderer.resetObstacles(250);
@@ -303,6 +320,7 @@ public class Game extends ApplicationAdapter {
 
         scoreManager.resetScore();
         scoreRenderer.resetHighscoreFlag();
+
 
         state = GameState.MENU;
 
