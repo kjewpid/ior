@@ -165,6 +165,10 @@ public class Game extends ApplicationAdapter {
         scoreRenderer.dispose();
         backgroundMusic.dispose();
         flowerRenderer.dispose();
+        backgroundRenderer.dispose();
+        hardButton.dispose();
+        mediumButton.dispose();
+        easyButton.dispose();
     }
 
     private void startGame() {
@@ -209,12 +213,12 @@ public class Game extends ApplicationAdapter {
      * Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) ||
      * Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
      * state = GameState.PLAYING;
-     * 
+     *
      * character.jump();
-     * 
+     *
      * scoreManager.resetScore();
      * scoreRenderer.resetHighscoreFlag();
-     * 
+     *
      * if (!backgroundMusic.isPlaying()) {
      * backgroundMusic.play();
      * }

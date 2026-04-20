@@ -10,6 +10,7 @@ public class Layer {
     private int instances;
     private float scale = 1f;
     float offsetX = 0;
+    boolean isOverlay = false;
 
     public Layer(Texture texture, float speed, float y, boolean repeat, int instances) {
         this.texture = texture;
@@ -54,5 +55,13 @@ public class Layer {
 
     public void setScale(float scale) {
         this.scale = scale;
+    }
+
+    public void setOverlay(){
+        this.isOverlay = true;
+    }
+
+    public boolean isOverlay(){
+        return isOverlay;
     }
 }

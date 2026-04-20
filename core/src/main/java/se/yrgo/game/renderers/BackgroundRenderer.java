@@ -174,5 +174,32 @@ public class BackgroundRenderer {
             }
         }
     }
+
+    public void dispose(){
+        safeDispose(backdrop);
+
+        safeDispose(background_trees_back);
+        safeDispose(background_trees_front);
+        safeDispose(background_fog);
+
+        safeDispose(background_trees);
+        safeDispose(background_trees_fog);
+
+        safeDispose(middle_trees);
+        safeDispose(middle_fog);
+
+        safeDispose(front_trees);
+        safeDispose(front_ground);
+        safeDispose(front_fog);
+
+        safeDispose(shader);
+        safeDispose(vignette);
+    }
+
+    private void safeDispose(Texture texture){
+        if (texture != null){
+            texture.dispose();
+        }
+    }
 }
 
