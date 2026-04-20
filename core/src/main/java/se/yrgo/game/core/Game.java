@@ -13,6 +13,7 @@ import se.yrgo.game.entities.Character;
 import se.yrgo.game.entities.Flower;
 import se.yrgo.game.renderers.*;
 
+import java.awt.*;
 import java.security.DigestException;
 
 public class Game extends ApplicationAdapter {
@@ -27,12 +28,8 @@ public class Game extends ApplicationAdapter {
     private float screenWidth;
 
     // Svårighetsgrad
-    private Button easyButton;
-    private Button mediumButton;
-    private Button hardButton;
-    private Texture menuBackground;
-    private Difficulty difficulty;
-
+    private MenuRenderer menuRenderer;
+    private Difficulty difficulty = Difficulty.EASY;
     // Karaktär
     Character character;
     CharacterRenderer characterRenderer;
@@ -64,26 +61,8 @@ public class Game extends ApplicationAdapter {
 
         startButton = new StartButton(400, 200, (screenWidth - 400) / 2, (screenHeight - 200) / 2);
         startButton.loadButton();
-
-        menuBackground = new Texture(Gdx.files.internal("Menu/menu.png"));
-        difficulty = Difficulty.EASY;
-
-        float buttonWidth = new Texture(Gdx.files.internal("Menu/Easy.png")).getWidth();
-        float centerX = (screenWidth - buttonWidth) / 2;
-
-        easyButton = new Button(centerX, 660,
-            "Menu/Easy.png",
-            "Menu/Easy_hover.png");
-
-        mediumButton = new Button(
-            centerX, 450,
-            "Menu/Normal.png",
-            "Menu/Normal_hover.png");
-
-        hardButton = new Button(
-            centerX, 215,
-            "Menu/Hard.png",
-            "Menu/Hard_hover.png");
+        menuRenderer = new MenuRenderer();
+        menuRenderer.load(screenWidth);
 
         obstacleRenderer = new ObstacleRenderer(250);
         obstacleRenderer.loadAssets();
@@ -141,9 +120,7 @@ public class Game extends ApplicationAdapter {
         backgroundMusic.dispose();
         flowerRenderer.dispose();
         backgroundRenderer.dispose();
-        hardButton.dispose();
-        mediumButton.dispose();
-        easyButton.dispose();
+        menuRenderer.dispose();
     }
 
     private void renderStart() {
@@ -156,19 +133,7 @@ public class Game extends ApplicationAdapter {
     private void renderMenu() {
         handleMenu();
         batch.begin();
-
-        float bgWidth = 750;
-        float bgHeight = 950;
-
-        float bgX = (screenWidth - bgWidth) / 2;
-        float bgY = (screenHeight - bgHeight) / 2;
-
-        batch.draw(menuBackground, bgX, bgY, bgWidth, bgHeight);
-
-        easyButton.render(batch);
-        mediumButton.render(batch);
-        hardButton.render(batch);
-
+        menuRenderer.render(batch, screenWidth, screenHeight);
         batch.end();
     }
 
@@ -253,18 +218,11 @@ public class Game extends ApplicationAdapter {
     }
 
     private void handleMenu() {
-        easyButton.update();
-        mediumButton.update();
-        hardButton.update();
+        menuRenderer.update();
 
-        if (easyButton.isClicked()) {
-            requestStart(Difficulty.EASY);
-        }
-        if (mediumButton.isClicked()) {
-            requestStart(Difficulty.MEDIUM);
-        }
-        if (hardButton.isClicked()) {
-            requestStart(Difficulty.HARD);
+        Difficulty selected = menuRenderer.checkSelection();
+        if (selected != null) {
+            requestStart(selected);
         }
     }
 
