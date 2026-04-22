@@ -88,7 +88,7 @@ public class BackgroundRenderer {
 
         layers.add(new Layer(middle_fog, 0.3f, 0, false, 6));
 
-        Layer frontTrees = new Layer(front_trees, 0.8f, -20, true, 2);
+        Layer frontTrees = new Layer(front_trees, 0.8f, 0, true, 2);
         frontTrees.setScale(1.1f);
         layers.add(frontTrees);
 

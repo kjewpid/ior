@@ -54,15 +54,18 @@ public class FlowerRenderer {
     }
 
 
-    public void spawnFlowers() {
+    public void spawnFlowers(float worldHeight, float worldWidth) {
         if (Math.random() < 0.02) { // ca 2% chans varje frame
-            float y = 50 + (float) (Math.random() * (Gdx.graphics.getHeight() - 100));
-            flowers.add(new Flower(Gdx.graphics.getWidth(), y));
+            float y = 50 + (float) (Math.random() * (worldHeight - 100));
+
+            float flowerWidth = 100f;
+            float x = worldWidth + flowerWidth;
+            flowers.add(new Flower(x, y));
         }
     }
 
-    public void updateFlowers(float delta, float speed) {
-        spawnFlowers();
+    public void updateFlowers(float delta, float speed, float worldHeight, float worldWidth) {
+        spawnFlowers(worldHeight, worldWidth);
         for (int i = flowers.size() - 1; i >= 0; i--) {
             Flower f = flowers.get(i);
             f.update(delta, speed);

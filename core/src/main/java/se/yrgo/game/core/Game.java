@@ -4,7 +4,8 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.Preferences;
@@ -12,14 +13,17 @@ import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 
+import com.badlogic.gdx.utils.viewport.Viewport;
 import se.yrgo.game.entities.Character;
 import se.yrgo.game.entities.Flower;
 import se.yrgo.game.renderers.*;
 
 import java.awt.*;
-import java.security.DigestException;
 
 public class Game extends ApplicationAdapter {
+    private OrthographicCamera camera;
+    private Viewport viewport;
+
     private enum GameState {
         START, MENU, PLAYING, GAME_OVER
     }
@@ -62,6 +66,15 @@ public class Game extends ApplicationAdapter {
     @Override
     public void create() {
 
+        // Sätt screensize
+        camera = new OrthographicCamera();
+        viewport = new FitViewport(1920, 1080, camera);
+        viewport.apply();
+        screenWidth = viewport.getWorldWidth();
+        screenHeight = viewport.getWorldHeight();
+        camera.position.set(screenWidth / 2f, screenHeight / 2f, 0);
+        camera.update();
+
         prefs = Gdx.app.getPreferences("GameSettings");
 
         // Ladda sparad difficulty (default = EASY om inget finns)
@@ -69,8 +82,6 @@ public class Game extends ApplicationAdapter {
         difficulty = Difficulty.valueOf(savedDifficulty);
 
         batch = new SpriteBatch();
-        screenHeight = Gdx.graphics.getHeight();
-        screenWidth = Gdx.graphics.getWidth();
 
         startButton = new StartButton(400, 200, (screenWidth - 400) / 2, (screenHeight - 200) / 2);
         startButton.loadButton();
@@ -140,6 +151,7 @@ public class Game extends ApplicationAdapter {
 
     private void renderStart() {
         startGame();
+        batch.setProjectionMatrix(camera.combined);
         batch.begin();
         startButton.renderStartButton(batch);
         batch.end();
@@ -147,6 +159,7 @@ public class Game extends ApplicationAdapter {
 
     private void renderMenu() {
         handleMenu();
+        batch.setProjectionMatrix(camera.combined);
         batch.begin();
         menuRenderer.render(batch, screenWidth, screenHeight);
         batch.end();
@@ -171,7 +184,7 @@ public class Game extends ApplicationAdapter {
 
     private void startGame() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) ||
-                Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+            Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
 
             state = GameState.MENU;
         }
@@ -205,29 +218,10 @@ public class Game extends ApplicationAdapter {
         }
     }
 
-    /*
-     * private void startGame() {
-     * if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) ||
-     * Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) ||
-     * Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
-     * state = GameState.PLAYING;
-     *
-     * character.jump();
-     *
-     * scoreManager.resetScore();
-     * scoreRenderer.resetHighscoreFlag();
-     *
-     * if (!backgroundMusic.isPlaying()) {
-     * backgroundMusic.play();
-     * }
-     * }
-     * }
-     */
-
     private void handleInput() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) ||
-                Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) ||
-                Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
+            Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) ||
+            Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
             character.jump();
         }
     }
@@ -240,7 +234,7 @@ public class Game extends ApplicationAdapter {
             requestStart(selected);
         }
         if (state == GameState.MENU &&
-                Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             startPlaying();
         }
     }
@@ -262,7 +256,7 @@ public class Game extends ApplicationAdapter {
 
         hasHitGround();
 
-        obstacleRenderer.spawnObstacles(delta);
+        obstacleRenderer.spawnObstacles(delta, viewport.getWorldHeight(), viewport.getWorldWidth());
         obstacleRenderer.updateObstacles(delta);
 
         if (obstacleRenderer.checkCollision(character)) {
@@ -271,7 +265,7 @@ public class Game extends ApplicationAdapter {
 
         scoreManager.checkObstaclePassed(character, obstacleRenderer.getObstacles());
 
-        flowerRenderer.updateFlowers(delta, obstacleRenderer.getObstacleSpeed());
+        flowerRenderer.updateFlowers(delta, obstacleRenderer.getObstacleSpeed(), viewport.getWorldHeight(), viewport.getWorldWidth());
         handleFlowerCollisions();
     }
 
@@ -282,11 +276,13 @@ public class Game extends ApplicationAdapter {
     }
 
     private void renderGame() {
+        batch.setProjectionMatrix(camera.combined);
+
         batch.begin();
         backgroundRenderer.render(batch);
         flowerRenderer.renderFlowers(batch, stateTime);
         characterRenderer.renderBee(character.isDying(), stateTime, batch, character.startX(), character.characterY());
-        obstacleRenderer.renderObstacles(batch);
+        obstacleRenderer.renderObstacles(batch, viewport.getWorldHeight());
         // Rita poäng
         scoreRenderer.renderScore(batch);
         batch.end();
@@ -349,5 +345,13 @@ public class Game extends ApplicationAdapter {
         state = GameState.MENU;
 
         stateTime = 0f;
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height);
+
+        camera.position.set(screenWidth / 2f, screenHeight / 2f, 0);
+        camera.update();
     }
 }

@@ -31,7 +31,7 @@ public class ObstacleRenderer {
         obstacleImage = new Texture("Obstacle.PNG");
     }
 
-    public void renderObstacles(SpriteBatch batch) {
+    public void renderObstacles(SpriteBatch batch, float worldHeight) {
         for (Obstacle o : obstacles) {
             // Scale the image proportionally
             float scale = o.getObstacleWidth() / obstacleImage.getWidth();
@@ -54,7 +54,7 @@ public class ObstacleRenderer {
 
             // Draw top obstacle
             float topY = o.getGapY() + gapHeight;
-            float topHeight = Gdx.graphics.getHeight() - topY;
+            float topHeight =  worldHeight - topY;
             batch.draw(
                     obstacleImage,
                     o.getX(),
@@ -70,12 +70,12 @@ public class ObstacleRenderer {
         }
     }
 
-    public void spawnObstacles(float delta) {
+    public void spawnObstacles(float delta, float worldHeight, float worldWidth) {
         spawnTimer += delta;
 
         if (spawnTimer > spawnRate) { // Spawna hinder varje x sekund
-            float screenHeight = Gdx.graphics.getHeight();
-            float screenWidth = Gdx.graphics.getWidth();
+            float screenHeight = worldHeight;
+            float screenWidth = worldWidth;
             float gapY = minObstacleHeight
                     + (float) (Math.random() * (screenHeight - gapHeight - 2 * minObstacleHeight));
             obstacles.add(new Obstacle(screenWidth, gapY, obstacleImage));

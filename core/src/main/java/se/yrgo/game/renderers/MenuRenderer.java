@@ -19,13 +19,13 @@ public class MenuRenderer {
         float buttonWidth = new Texture(Gdx.files.internal("Menu/Easy.png")).getWidth();
         float centerX = (screenWidth - buttonWidth) / 2;
 
-        easyButton = new Button(centerX, 615,
+        easyButton = new Button(centerX, 670,
             "Menu/Easy.png", "Menu/Easy_hover.png");
 
-        mediumButton = new Button(centerX, 410,
+        mediumButton = new Button(centerX, 470,
             "Menu/Normal.png", "Menu/Normal_hover.png");
 
-        hardButton = new Button(centerX, 170,
+        hardButton = new Button(centerX, 230,
             "Menu/Hard.png", "Menu/Hard_hover.png");
     }
 
