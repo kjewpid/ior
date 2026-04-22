@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.Preferences;
 
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
@@ -22,6 +23,8 @@ public class Game extends ApplicationAdapter {
     private enum GameState {
         START, MENU, PLAYING, GAME_OVER
     }
+
+    private Preferences prefs;
 
     private GameState state = GameState.START;
     private SpriteBatch batch;
@@ -58,6 +61,13 @@ public class Game extends ApplicationAdapter {
 
     @Override
     public void create() {
+
+        prefs = Gdx.app.getPreferences("GameSettings");
+
+        // Ladda sparad difficulty (default = EASY om inget finns)
+        String savedDifficulty = prefs.getString("difficulty", "EASY");
+        difficulty = Difficulty.valueOf(savedDifficulty);
+
         batch = new SpriteBatch();
         screenHeight = Gdx.graphics.getHeight();
         screenWidth = Gdx.graphics.getWidth();
@@ -161,7 +171,7 @@ public class Game extends ApplicationAdapter {
 
     private void startGame() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) ||
-            Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+                Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
 
             state = GameState.MENU;
         }
@@ -216,8 +226,8 @@ public class Game extends ApplicationAdapter {
 
     private void handleInput() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) ||
-            Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) ||
-            Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
+                Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) ||
+                Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
             character.jump();
         }
     }
@@ -229,10 +239,19 @@ public class Game extends ApplicationAdapter {
         if (selected != null) {
             requestStart(selected);
         }
+        if (state == GameState.MENU &&
+                Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            startPlaying();
+        }
     }
 
     private void requestStart(Difficulty diff) {
         difficulty = diff;
+
+        // Spara valet
+        prefs.putString("difficulty", diff.name());
+        prefs.flush(); // sparar på riktigt!
+
         startPlaying();
     }
 
@@ -326,7 +345,6 @@ public class Game extends ApplicationAdapter {
 
         scoreManager.resetScore();
         scoreRenderer.resetHighscoreFlag();
-
 
         state = GameState.MENU;
 
