@@ -9,6 +9,8 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.Intersector;
 
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
+
 import se.yrgo.game.entities.Character;
 import se.yrgo.game.entities.Flower;
 import se.yrgo.game.renderers.*;
@@ -48,6 +50,7 @@ public class Game extends ApplicationAdapter {
     ScoreManager scoreManager;
     // Ljud
     private Music backgroundMusic;
+    private Sound deathSound;
 
     // Bakgrund
     private BackgroundRenderer backgroundRenderer;
@@ -81,6 +84,7 @@ public class Game extends ApplicationAdapter {
         backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("MusicBackground.mp3"));
         backgroundMusic.setLooping(true);
         backgroundMusic.setVolume(0.5f);
+        deathSound = Gdx.audio.newSound(Gdx.files.internal("BeeDyingSound.mp3"));
 
         backgroundRenderer = new BackgroundRenderer();
         backgroundRenderer.loadAssets();
@@ -121,6 +125,7 @@ public class Game extends ApplicationAdapter {
         flowerRenderer.dispose();
         backgroundRenderer.dispose();
         menuRenderer.dispose();
+        deathSound.dispose();
     }
 
     private void renderStart() {
@@ -280,6 +285,7 @@ public class Game extends ApplicationAdapter {
 
     private void gameOver() {
         state = GameState.GAME_OVER;
+        deathSound.play();
         character.setDying(true);
         stateTime = 0f;
 
