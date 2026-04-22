@@ -31,16 +31,16 @@ public class ScoreRenderer {
 
     }
 
-    public void renderScore(SpriteBatch batch) {
+    public void renderScore(SpriteBatch batch, float worldWidth, float worldHeight) {
         String scoreText = "Score: " + scoreManager.getScore();
         String highScoreText = "Highscore: " + scoreManager.getHighScore();
 
         layout.setText(font, scoreText);
-        float x = (Gdx.graphics.getWidth() - layout.width) / 2;
-        float y = Gdx.graphics.getHeight() - 100;
+        float x = (worldWidth - layout.width) / 2;
+        float y = worldHeight- 100;
         font.draw(batch, scoreText, x, y);
 
-        font.draw(batch, highScoreText, 20, Gdx.graphics.getHeight() - 20);
+        font.draw(batch, highScoreText, 20, worldHeight - 20);
 
         if (scoreManager.getScore() > highScoreAtStart && !newHighscorePlayed) {
             highscoreSound.play(0.7f);

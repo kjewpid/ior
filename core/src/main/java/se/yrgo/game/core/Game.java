@@ -188,12 +188,17 @@ public class Game extends ApplicationAdapter {
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
 
-        deathTime = 0f;
         float fadeDuration = 1f;
-        if (deathTime < fadeDuration) {
+        float fade = Math.min(deathTime / fadeDuration, 1f);
+
+        // still show world fading out
+        if (fade < 1f) {
             character.updateCharacter(delta, screenHeight);
+
             backgroundRenderer.render(batch);
+
             flowerRenderer.renderFlowers(batch, stateTime);
+
             characterRenderer.renderBee(
                 character.isDying(),
                 stateTime,
@@ -201,11 +206,19 @@ public class Game extends ApplicationAdapter {
                 character.startX(),
                 character.characterY()
             );
+
             obstacleRenderer.renderObstacles(batch, viewport.getWorldHeight());
-            scoreRenderer.renderScore(batch);
+
+            scoreRenderer.renderScore(
+                batch,
+                viewport.getWorldWidth(),
+                viewport.getWorldHeight()
+            );
         }
 
-        gameOverRenderer.render(batch,
+        // always draw game over UI on top
+        gameOverRenderer.render(
+            batch,
             viewport.getWorldWidth(),
             viewport.getWorldHeight()
         );
@@ -321,7 +334,7 @@ public class Game extends ApplicationAdapter {
         characterRenderer.renderBee(character.isDying(), stateTime, batch, character.startX(), character.characterY());
         obstacleRenderer.renderObstacles(batch, viewport.getWorldHeight());
         // Rita poäng
-        scoreRenderer.renderScore(batch);
+        scoreRenderer.renderScore(batch, viewport.getWorldWidth(), viewport.getWorldHeight());
         batch.end();
     }
 
