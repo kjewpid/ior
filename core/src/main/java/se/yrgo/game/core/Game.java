@@ -63,6 +63,10 @@ public class Game extends ApplicationAdapter {
     private BackgroundRenderer backgroundRenderer;
     private float cameraSpeed;
 
+    //GameOver
+    private GameOverRenderer gameOverRenderer;
+    private float deathTime = -1f;
+
     @Override
     public void create() {
 
@@ -111,11 +115,14 @@ public class Game extends ApplicationAdapter {
         backgroundRenderer.loadAssets();
         backgroundRenderer.setupLayers();
         cameraSpeed = 100f;
+
+        gameOverRenderer = new GameOverRenderer();
+        gameOverRenderer.loadAssets();
     }
 
     @Override
     public void render() {
-        Gdx.gl.glClearColor(0.5f, 0.8f, 1f, 1); // Tillfälligt för att se bakgrund
+        Gdx.gl.glClearColor(0, 0, 0, 0); // Tillfälligt för att se bakgrund
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         float delta = Gdx.graphics.getDeltaTime();
         stateTime += delta;
@@ -147,6 +154,7 @@ public class Game extends ApplicationAdapter {
         backgroundRenderer.dispose();
         menuRenderer.dispose();
         deathSound.dispose();
+        gameOverRenderer.dispose();
     }
 
     private void renderStart() {
@@ -175,10 +183,35 @@ public class Game extends ApplicationAdapter {
     }
 
     private void renderGameOver(float delta) {
-        if (!character.isFinishedDying()) {
+        gameOverRenderer.update(delta);
+
+        batch.setProjectionMatrix(camera.combined);
+        batch.begin();
+
+        deathTime = 0f;
+        float fadeDuration = 1f;
+        if (deathTime < fadeDuration) {
             character.updateCharacter(delta, screenHeight);
-            renderGame();
+            backgroundRenderer.render(batch);
+            flowerRenderer.renderFlowers(batch, stateTime);
+            characterRenderer.renderBee(
+                character.isDying(),
+                stateTime,
+                batch,
+                character.startX(),
+                character.characterY()
+            );
+            obstacleRenderer.renderObstacles(batch, viewport.getWorldHeight());
+            scoreRenderer.renderScore(batch);
         }
+
+        gameOverRenderer.render(batch,
+            viewport.getWorldWidth(),
+            viewport.getWorldHeight()
+        );
+
+        batch.end();
+
         handleGameOverInput();
     }
 
@@ -267,6 +300,10 @@ public class Game extends ApplicationAdapter {
 
         flowerRenderer.updateFlowers(delta, obstacleRenderer.getObstacleSpeed(), viewport.getWorldHeight(), viewport.getWorldWidth());
         handleFlowerCollisions();
+
+        if (deathTime >= 0f) {
+            deathTime += delta;
+        }
     }
 
     private void hasHitGround() {
@@ -345,6 +382,8 @@ public class Game extends ApplicationAdapter {
         state = GameState.MENU;
 
         stateTime = 0f;
+        deathTime = -1f;
+        gameOverRenderer.reset();
     }
 
     @Override
