@@ -1,10 +1,12 @@
 package se.yrgo.game.renderers;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import se.yrgo.game.core.Button;
 import se.yrgo.game.core.Difficulty;
+
 public class MenuRenderer {
 
     private Texture menuBackground;
@@ -13,6 +15,10 @@ public class MenuRenderer {
     private Button mediumButton;
     private Button hardButton;
 
+    private Difficulty selectedDifficulty = Difficulty.EASY;
+
+    private boolean selected;
+
     public void load(float screenWidth) {
         menuBackground = new Texture(Gdx.files.internal("Menu/menu.png"));
 
@@ -20,19 +26,35 @@ public class MenuRenderer {
         float centerX = (screenWidth - buttonWidth) / 2;
 
         easyButton = new Button(centerX, 670,
-            "Menu/Easy.png", "Menu/Easy_hover.png");
+                "Menu/Easy.png", "Menu/Easy_hover.png");
 
         mediumButton = new Button(centerX, 470,
-            "Menu/Normal.png", "Menu/Normal_hover.png");
+                "Menu/Normal.png", "Menu/Normal_hover.png");
 
         hardButton = new Button(centerX, 230,
-            "Menu/Hard.png", "Menu/Hard_hover.png");
+                "Menu/Hard.png", "Menu/Hard_hover.png");
+    }
+
+    public void setSelectedDifficulty(Difficulty difficulty) {
+        this.selectedDifficulty = difficulty;
     }
 
     public void update() {
         easyButton.update();
         mediumButton.update();
         hardButton.update();
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+            selectedDifficulty = next(selectedDifficulty);
+        }
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+            selectedDifficulty = previous(selectedDifficulty);
+        }
+
+        easyButton.setSelected(selectedDifficulty == Difficulty.EASY);
+        mediumButton.setSelected(selectedDifficulty == Difficulty.MEDIUM);
+        hardButton.setSelected(selectedDifficulty == Difficulty.HARD);
     }
 
     public void render(SpriteBatch batch, float screenWidth, float screenHeight) {
@@ -52,10 +74,29 @@ public class MenuRenderer {
     }
 
     public Difficulty checkSelection() {
-        if (easyButton.isClicked()) return Difficulty.EASY;
-        if (mediumButton.isClicked()) return Difficulty.MEDIUM;
-        if (hardButton.isClicked()) return Difficulty.HARD;
+        if (easyButton.isClicked())
+            return Difficulty.EASY;
+        if (mediumButton.isClicked())
+            return Difficulty.MEDIUM;
+        if (hardButton.isClicked())
+            return Difficulty.HARD;
         return null;
+    }
+
+    public Difficulty getSelectedDifficulty() {
+        return selectedDifficulty;
+    }
+
+    private Difficulty next(Difficulty current) {
+        Difficulty[] values = Difficulty.values();
+        int index = (current.ordinal() + 1) % values.length;
+        return values[index];
+    }
+
+    private Difficulty previous(Difficulty current) {
+        Difficulty[] values = Difficulty.values();
+        int index = (current.ordinal() - 1 + values.length) % values.length;
+        return values[index];
     }
 
     public void dispose() {

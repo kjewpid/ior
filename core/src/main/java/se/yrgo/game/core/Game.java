@@ -63,7 +63,7 @@ public class Game extends ApplicationAdapter {
     private BackgroundRenderer backgroundRenderer;
     private float cameraSpeed;
 
-    //GameOver
+    // GameOver
     private GameOverRenderer gameOverRenderer;
     private float deathTime = -1f;
 
@@ -200,28 +200,25 @@ public class Game extends ApplicationAdapter {
             flowerRenderer.renderFlowers(batch, stateTime);
 
             characterRenderer.renderBee(
-                character.isDying(),
-                stateTime,
-                batch,
-                character.startX(),
-                character.characterY()
-            );
+                    character.isDying(),
+                    stateTime,
+                    batch,
+                    character.startX(),
+                    character.characterY());
 
             obstacleRenderer.renderObstacles(batch, viewport.getWorldHeight());
 
             scoreRenderer.renderScore(
-                batch,
-                viewport.getWorldWidth(),
-                viewport.getWorldHeight()
-            );
+                    batch,
+                    viewport.getWorldWidth(),
+                    viewport.getWorldHeight());
         }
 
         // always draw game over UI on top
         gameOverRenderer.render(
-            batch,
-            viewport.getWorldWidth(),
-            viewport.getWorldHeight()
-        );
+                batch,
+                viewport.getWorldWidth(),
+                viewport.getWorldHeight());
 
         batch.end();
 
@@ -230,7 +227,7 @@ public class Game extends ApplicationAdapter {
 
     private void startGame() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) ||
-            Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+                Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
 
             state = GameState.MENU;
         }
@@ -266,8 +263,8 @@ public class Game extends ApplicationAdapter {
 
     private void handleInput() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) ||
-            Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) ||
-            Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
+                Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) ||
+                Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
             character.jump();
         }
     }
@@ -275,13 +272,12 @@ public class Game extends ApplicationAdapter {
     private void handleMenu() {
         menuRenderer.update();
 
-        Difficulty selected = menuRenderer.checkSelection();
-        if (selected != null) {
-            requestStart(selected);
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            requestStart(menuRenderer.getSelectedDifficulty());
         }
-        if (state == GameState.MENU &&
-            Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            startPlaying();
+
+        if (startButton.isClicked()) {
+            requestStart(menuRenderer.getSelectedDifficulty());
         }
     }
 
@@ -311,7 +307,8 @@ public class Game extends ApplicationAdapter {
 
         scoreManager.checkObstaclePassed(character, obstacleRenderer.getObstacles());
 
-        flowerRenderer.updateFlowers(delta, obstacleRenderer.getObstacleSpeed(), viewport.getWorldHeight(), viewport.getWorldWidth());
+        flowerRenderer.updateFlowers(delta, obstacleRenderer.getObstacleSpeed(), viewport.getWorldHeight(),
+                viewport.getWorldWidth());
         handleFlowerCollisions();
 
         if (deathTime >= 0f) {
@@ -393,6 +390,7 @@ public class Game extends ApplicationAdapter {
         scoreRenderer.resetHighscoreFlag();
 
         state = GameState.MENU;
+        menuRenderer.setSelectedDifficulty(difficulty);
 
         stateTime = 0f;
         deathTime = -1f;

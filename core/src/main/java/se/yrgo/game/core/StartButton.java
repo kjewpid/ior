@@ -25,4 +25,8 @@ public class StartButton {
     public void renderStartButton(SpriteBatch batch) {
         batch.draw(texture, buttonX, buttonY, buttonWidth, buttonHeight);
     }
+
+    public boolean isClicked() {
+        return Gdx.input.justTouched();
+    }
 }

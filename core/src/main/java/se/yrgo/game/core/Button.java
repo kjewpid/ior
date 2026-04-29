@@ -13,19 +13,20 @@ public class Button {
     private Texture hoverTexture;
 
     private boolean hovered;
+    private boolean selected;
 
-public Button(float x, float y,
-              String normalImg, String hoverImg) {
+    public Button(float x, float y,
+            String normalImg, String hoverImg) {
 
-    this.x = x;
-    this.y = y;
+        this.x = x;
+        this.y = y;
 
-    normalTexture = new Texture(Gdx.files.internal(normalImg));
-    hoverTexture = new Texture(Gdx.files.internal(hoverImg));
+        normalTexture = new Texture(Gdx.files.internal(normalImg));
+        hoverTexture = new Texture(Gdx.files.internal(hoverImg));
 
-    this.width = normalTexture.getWidth();
-    this.height = normalTexture.getHeight();
-}
+        this.width = normalTexture.getWidth();
+        this.height = normalTexture.getHeight();
+    }
 
     public void update() {
         float mouseX = Gdx.input.getX();
@@ -40,9 +41,16 @@ public Button(float x, float y,
     }
 
     public void render(SpriteBatch batch) {
+
+        boolean active = hovered || selected;
+
         batch.draw(
-                hovered ? hoverTexture : normalTexture,
+                active ? hoverTexture : normalTexture,
                 x, y, width, height);
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
     }
 
     public void dispose() {
