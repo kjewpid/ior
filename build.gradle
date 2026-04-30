@@ -7,16 +7,18 @@ buildscript {
     maven { url = 'https://central.sonatype.com/repository/maven-snapshots/' }
   }
   dependencies {
-
-
+    // keep empty (as in your original intent)
   }
+}
+
+plugins {
+  id "org.sonarqube" version "7.2.3.7755"
 }
 
 allprojects {
   apply plugin: 'eclipse'
   apply plugin: 'idea'
 
-  // This allows you to "Build and run using IntelliJ IDEA", an option in IDEA's Settings.
   idea {
     module {
       outputDir = file('build/classes/java/main')
@@ -29,24 +31,17 @@ configure(subprojects) {
   apply plugin: 'java-library'
   java.sourceCompatibility = 21
 
-  // From https://lyze.dev/2021/04/29/libGDX-Internal-Assets-List/
-  // The article can be helpful when using assets.txt in your project.
   tasks.register('generateAssetList') {
     inputs.dir("${project.rootDir}/assets/")
-    // projectFolder/assets
     File assetsFolder = new File("${project.rootDir}/assets/")
-    // projectFolder/assets/assets.txt
     File assetsFile = new File(assetsFolder, "assets.txt")
-    // delete that file in case we've already created it
     assetsFile.delete()
 
-    // iterate through all files inside that folder
-    // convert it to a relative path
-    // and append it to the file assets.txt
     fileTree(assetsFolder).collect { assetsFolder.relativePath(it) }.sort().each {
       assetsFile.append(it + "\n")
     }
   }
+
   processResources.dependsOn 'generateAssetList'
 
   compileJava {
@@ -57,9 +52,9 @@ configure(subprojects) {
 subprojects {
   version = "$projectVersion"
   ext.appName = 'am_space_invaders_gdx'
+
   repositories {
     mavenCentral()
-    // You may want to remove the following line if you have errors downloading dependencies.
     mavenLocal()
     maven { url = 'https://central.sonatype.com/repository/maven-snapshots/' }
     maven { url = 'https://jitpack.io' }
@@ -67,3 +62,10 @@ subprojects {
 }
 
 eclipse.project.name = 'am_space_invaders_gdx' + '-parent'
+
+sonar {
+  properties {
+    property "sonar.projectKey", "agil_game"
+    property "sonar.projectName", "agil_game"
+  }
+}
