@@ -62,6 +62,7 @@ public class Game extends ApplicationAdapter {
     // Bakgrund
     private BackgroundRenderer backgroundRenderer;
     private float cameraSpeed;
+    private float speedMultiplier;
 
     // GameOver
     private GameOverRenderer gameOverRenderer;
@@ -249,14 +250,17 @@ public class Game extends ApplicationAdapter {
 
             case EASY:
                 obstacleRenderer.setSpeed(200);
+                speedMultiplier = 1f;
                 break;
 
             case MEDIUM:
                 obstacleRenderer.setSpeed(300);
+                speedMultiplier = 1.5f;
                 break;
 
             case HARD:
                 obstacleRenderer.setSpeed(450);
+                speedMultiplier = 2f;
                 break;
         }
     }
@@ -292,7 +296,7 @@ public class Game extends ApplicationAdapter {
     }
 
     private void updateGame(float delta) {
-        backgroundRenderer.update(delta, cameraSpeed);
+        backgroundRenderer.update(delta, cameraSpeed, speedMultiplier);
         updateMusic();
         character.updateCharacter(delta, screenHeight);
 

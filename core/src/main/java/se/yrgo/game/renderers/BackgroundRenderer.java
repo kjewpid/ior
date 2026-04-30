@@ -113,12 +113,12 @@ public class BackgroundRenderer {
         layers.add(new Layer(vignette, 0f, 0, false, 1));
     }
 
-    public void update(float delta, float cameraSpeed) {
+    public void update(float delta, float cameraSpeed, float speedMultiplier) {
 
         for (Layer layer : layers) {
             layer.setOffsetX(
                 layer.getOffsetX() +
-                    cameraSpeed * layer.getSpeed() * delta
+                    cameraSpeed * speedMultiplier * layer.getSpeed() * delta
             );
 
             float width = layer.getTexture().getWidth() * layer.getScale();
