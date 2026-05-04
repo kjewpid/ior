@@ -18,6 +18,7 @@ public class MenuRenderer {
     private Difficulty selectedDifficulty = Difficulty.EASY;
 
     private boolean selected;
+    private boolean usingMouse = false;
 
     public void load(float screenWidth) {
         menuBackground = new Texture(Gdx.files.internal("Menu/menu.png"));
@@ -44,14 +45,36 @@ public class MenuRenderer {
         mediumButton.update();
         hardButton.update();
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
-            selectedDifficulty = next(selectedDifficulty);
+        if (Gdx.input.getDeltaX() != 0 || Gdx.input.getDeltaY() != 0) {
+            usingMouse = true;
+        }
+        // Kolla om keyboard används
+        if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN) ||
+                Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+            usingMouse = false;
         }
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-            selectedDifficulty = previous(selectedDifficulty);
+        // MUS styr
+        if (usingMouse) {
+            if (easyButton.isHovered()) {
+                selectedDifficulty = Difficulty.EASY;
+            } else if (mediumButton.isHovered()) {
+                selectedDifficulty = Difficulty.MEDIUM;
+            } else if (hardButton.isHovered()) {
+                selectedDifficulty = Difficulty.HARD;
+            }
         }
 
+        // KEYBOARD styr
+        if (!usingMouse) {
+            if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+                selectedDifficulty = next(selectedDifficulty);
+            }
+
+            if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+                selectedDifficulty = previous(selectedDifficulty);
+            }
+        }
         easyButton.setSelected(selectedDifficulty == Difficulty.EASY);
         mediumButton.setSelected(selectedDifficulty == Difficulty.MEDIUM);
         hardButton.setSelected(selectedDifficulty == Difficulty.HARD);
@@ -74,12 +97,13 @@ public class MenuRenderer {
     }
 
     public Difficulty checkSelection() {
-        if (easyButton.isClicked())
-            return Difficulty.EASY;
-        if (mediumButton.isClicked())
-            return Difficulty.MEDIUM;
-        if (hardButton.isClicked())
-            return Difficulty.HARD;
+        if (easyButton.isHovered()) {
+            selectedDifficulty = Difficulty.EASY;
+        } else if (mediumButton.isHovered()) {
+            selectedDifficulty = Difficulty.MEDIUM;
+        } else if (hardButton.isHovered()) {
+            selectedDifficulty = Difficulty.HARD;
+        }
         return null;
     }
 

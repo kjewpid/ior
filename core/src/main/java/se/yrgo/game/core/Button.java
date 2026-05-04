@@ -42,7 +42,7 @@ public class Button {
 
     public void render(SpriteBatch batch) {
 
-        boolean active = hovered || selected;
+        boolean active = selected;
 
         batch.draw(
                 active ? hoverTexture : normalTexture,
@@ -51,6 +51,10 @@ public class Button {
 
     public void setSelected(boolean selected) {
         this.selected = selected;
+    }
+
+    public boolean isHovered() {
+        return hovered;
     }
 
     public void dispose() {
