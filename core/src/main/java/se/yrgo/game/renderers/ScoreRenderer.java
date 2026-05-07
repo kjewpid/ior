@@ -29,7 +29,7 @@ public class ScoreRenderer {
 
         layout = new GlyphLayout();
 
-        highscoreSound = Gdx.audio.newSound(Gdx.files.internal("HighScoreSound.wav"));
+        highscoreSound = Gdx.audio.newSound(Gdx.files.internal("HighScoreSound.mp3"));
 
     }
 
